@@ -114,7 +114,7 @@ export default function DashboardPage() {
         background: "bg-violet-50",
       },
       {
-        label: "เช็กชื่อทั้งหมด",
+        label: "เช็คชื่อทั้งหมด",
         value: overview?.totalRecords ?? 0,
         suffix: "รายการ",
         icon: CheckCircleIcon,
@@ -315,7 +315,7 @@ function AttendanceDistribution({ overview }: { overview: DashboardOverview }) {
             {tr("สถานะการเข้าเรียนทั้งระบบ")}
           </h2>
           <p className="mt-1 text-sm text-gray-500">
-            {tr("สัดส่วนจากรายการเช็กชื่อทั้งหมดในปีการศึกษานี้")}
+            {tr("สัดส่วนจากรายการเช็คชื่อทั้งหมดในปีการศึกษานี้")}
           </p>
         </div>
         <div className="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-2 text-right dark:border-blue-900 dark:bg-blue-950/50">
@@ -508,13 +508,13 @@ function RecentActivity({
   return (
     <section className="dashboard-card min-w-0 overflow-hidden">
       <div className="px-5 pt-5 pb-2 sm:px-6 sm:pt-6">
-        <h2 className="dashboard-section-title">{tr("การเช็กชื่อล่าสุด")}</h2>
+        <h2 className="dashboard-section-title">{tr("การเช็คชื่อล่าสุด")}</h2>
         <p className="mt-1 text-sm text-gray-500">
           {tr("ความเคลื่อนไหวล่าสุดจากทุกวิชา")}
         </p>
       </div>
       {data.length === 0 ? (
-        <SmallEmpty text="ยังไม่มีกิจกรรมการเช็กชื่อ" />
+        <SmallEmpty text="ยังไม่มีกิจกรรมการเช็คชื่อ" />
       ) : (
         <ul className="divide-y divide-gray-100 px-5 sm:px-6">
           {data.map((item, index) => (

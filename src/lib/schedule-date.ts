@@ -28,7 +28,7 @@ export function getScheduleDateError(
 ): string | null {
   if (!parseCalendarDate(value)) return "วันที่ไม่ถูกต้อง";
   if ((value as string) < getBangkokDateKey(now)) {
-    return "ไม่สามารถตั้งเวลาเช็กชื่อย้อนหลังได้ กรุณาเลือกวันนี้หรือวันในอนาคต";
+    return "ไม่สามารถตั้งเวลาเช็คชื่อย้อนหลังได้ กรุณาเลือกวันนี้หรือวันในอนาคต";
   }
   return null;
 }

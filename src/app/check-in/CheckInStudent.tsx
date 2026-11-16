@@ -363,7 +363,7 @@ export default function CheckInStudentPage({
               {config?.location && (
                 <li>{tr("อนุญาตการเข้าถึงตำแหน่ง แล้วกดดึงตำแหน่งปัจจุบัน")}</li>
               )}
-              <li>{tr("กด “ยืนยันเช็กชื่อ” และรอจนระบบแสดงข้อความเช็กชื่อสำเร็จ")}</li>
+              <li>{tr("กด “ยืนยันเช็คชื่อ” และรอจนระบบแสดงข้อความเช็คชื่อสำเร็จ")}</li>
             </ol>
 
             {config?.photo && (
@@ -388,7 +388,7 @@ export default function CheckInStudentPage({
               id="student-info-title"
               className="text-base font-semibold text-slate-800"
             >{tr("ข้อมูลนักศึกษา")}</h2>
-            <p className="mt-1 text-sm leading-relaxed text-slate-500">{tr("กรอกข้อมูลของคุณให้ครบถ้วน แล้วตรวจสอบก่อนยืนยันเช็กชื่อ")}</p>
+            <p className="mt-1 text-sm leading-relaxed text-slate-500">{tr("กรอกข้อมูลของคุณให้ครบถ้วน แล้วตรวจสอบก่อนยืนยันเช็คชื่อ")}</p>
           </div>
           <div className="px-5 py-6 sm:px-8 sm:py-7">
             <div className="space-y-6">
@@ -665,7 +665,7 @@ export default function CheckInStudentPage({
                         <Image
                           unoptimized
                           src={preview}
-                          alt={tr("ตัวอย่างรูปสำหรับเช็กชื่อ")}
+                          alt={tr("ตัวอย่างรูปสำหรับเช็คชื่อ")}
                           width={720}
                           height={480}
                           className="w-full max-h-60 object-contain rounded-lg border bg-gray-50 hover:opacity-90 transition"
@@ -731,7 +731,7 @@ export default function CheckInStudentPage({
                       : "bg-slate-100 text-slate-400"
                   }`}
                 >
-                  <CheckCircleIcon aria-hidden="true" className="h-5 w-5" />{tr("ยืนยันเช็กชื่อ")}</button>
+                  <CheckCircleIcon aria-hidden="true" className="h-5 w-5" />{tr("ยืนยันเช็คชื่อ")}</button>
                 <p className="mt-3 text-center text-xs leading-relaxed text-slate-400">{tr("โปรดตรวจสอบชื่อและรหัสนักศึกษาให้ถูกต้องก่อนยืนยัน")}</p>
               </div>
             </div>

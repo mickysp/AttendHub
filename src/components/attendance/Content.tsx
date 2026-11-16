@@ -196,7 +196,7 @@ export default function AttendanceContent() {
           <div>
             <h1 className="app-page-title">{tr("เวลาเข้าเรียน")}</h1>
             <p className="app-page-description">
-              {tr("ตรวจสอบการเช็กชื่อ คะแนน และประวัติการเข้าเรียนรายนักศึกษา")}
+              {tr("ตรวจสอบการเช็คชื่อ คะแนน และประวัติการเข้าเรียนรายนักศึกษา")}
             </p>
           </div>
           <div className="flex w-full items-center gap-2 sm:w-auto">

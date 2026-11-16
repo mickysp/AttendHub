@@ -392,7 +392,7 @@ export default function QRPage({ classId }: { classId: string | null }) {
 
   const handleCopy = async () => {
     if (!link) {
-      showError("ไม่พบลิงก์เช็กชื่อ");
+      showError("ไม่พบลิงก์เช็คชื่อ");
       return;
     }
 
@@ -449,7 +449,7 @@ export default function QRPage({ classId }: { classId: string | null }) {
 
       const downloadLink = document.createElement("a");
 
-      downloadLink.download = `เช็กชื่อวิชา-${
+      downloadLink.download = `เช็คชื่อวิชา-${
         classInfo?.className || "ไม่ทราบชื่อวิชา"
       }.png`;
       downloadLink.href = canvas.toDataURL("image/png");
@@ -568,10 +568,10 @@ export default function QRPage({ classId }: { classId: string | null }) {
                 </section>
 
                 <section className="mb-8 mt-6 rounded-2xl border border-gray-200 bg-white p-5">
-                  <h3 className="mb-4 text-sm text-gray-800">{tr("ตั้งเวลาเช็กชื่อ")}</h3>
+                  <h3 className="mb-4 text-sm text-gray-800">{tr("ตั้งเวลาเช็คชื่อ")}</h3>
 
                   {dateReset && (
-                    <p role="status" className="mb-4 text-sm text-blue-600">{tr("ระบบใช้เวลาเดิมเป็นค่าเริ่มต้น กรุณาตรวจสอบวันที่และเวลา แล้วกดบันทึกเพื่อสร้างรอบเช็กชื่อใหม่")}</p>
+                    <p role="status" className="mb-4 text-sm text-blue-600">{tr("ระบบใช้เวลาเดิมเป็นค่าเริ่มต้น กรุณาตรวจสอบวันที่และเวลา แล้วกดบันทึกเพื่อสร้างรอบเช็คชื่อใหม่")}</p>
                   )}
 
                   <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
@@ -679,7 +679,7 @@ export default function QRPage({ classId }: { classId: string | null }) {
 
                 <section className="flex h-full flex-col">
                   <div className="mb-6">
-                    <label className="text-sm text-gray-700">{tr("ลิงก์เช็กชื่อ")}</label>
+                    <label className="text-sm text-gray-700">{tr("ลิงก์เช็คชื่อ")}</label>
 
                     <div className="mt-1 flex gap-2">
                       <input
@@ -717,7 +717,7 @@ export default function QRPage({ classId }: { classId: string | null }) {
                       </button>
                     </div>
 
-                    <p className="text-center text-sm text-gray-500">{tr("QR Code เช็กชื่อ")}</p>
+                    <p className="text-center text-sm text-gray-500">{tr("QR Code เช็คชื่อ")}</p>
 
                     <button
                       type="button"
@@ -757,7 +757,7 @@ export default function QRPage({ classId }: { classId: string | null }) {
               <h2
                 id="qr-dialog-title"
                 className="text-base font-semibold text-gray-800 sm:text-lg"
-              >{tr("QR Code เช็กชื่อ")}</h2>
+              >{tr("QR Code เช็คชื่อ")}</h2>
 
               <button
                 ref={closeButtonRef}
@@ -781,10 +781,10 @@ export default function QRPage({ classId }: { classId: string | null }) {
 
               <div className="flex flex-col items-center gap-2 text-center">
                 <p className="text-sm font-medium text-gray-700">
-                  {classInfo?.className || tr("QR Code เช็กชื่อ")}
+                  {classInfo?.className || tr("QR Code เช็คชื่อ")}
                 </p>
 
-                <p className="text-xs text-gray-400">{tr("สแกน QR Code เพื่อเข้าสู่หน้าเช็กชื่อ")}</p>
+                <p className="text-xs text-gray-400">{tr("สแกน QR Code เพื่อเข้าสู่หน้าเช็คชื่อ")}</p>
               </div>
 
               <button

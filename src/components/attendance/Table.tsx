@@ -578,7 +578,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                                 <Image
                                   unoptimized
                                   src={log.photo}
-                                  alt={tr("รูปประกอบการเช็กชื่อ")}
+                                  alt={tr("รูปประกอบการเช็คชื่อ")}
                                   width={96}
                                   height={96}
                                   className="h-full min-h-[96px] w-24 rounded-2xl border border-gray-200 object-cover"
