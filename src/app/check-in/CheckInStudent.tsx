@@ -328,7 +328,7 @@ export default function CheckInStudentPage({
               </div>
               <div>
                 <p className="text-xs font-medium tracking-widest text-slate-400">
-                  Classora
+                  AttendHub
                 </p>
                 <p className="mt-0.5 text-sm text-slate-600">{tr("เช็คชื่อเข้าเรียน")}</p>
               </div>
@@ -737,7 +737,7 @@ export default function CheckInStudentPage({
             </div>
           </div>
         </section>
-        <p className="pb-2 text-center text-xs text-slate-400">{tr("Classora · ระบบบันทึกการเข้าเรียน")}</p>
+        <p className="pb-2 text-center text-xs text-slate-400">{tr("AttendHub · ระบบบันทึกการเข้าเรียน")}</p>
       </div>
     </main>
   );

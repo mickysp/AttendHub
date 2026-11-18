@@ -358,7 +358,7 @@ Get current location
 Your location will be used to verify attendance
 Confirm check-in
 Check your name and student ID before confirming
-Classora · Attendance system
+AttendHub · Attendance system
 Page not found
 Back to home
 All
@@ -433,7 +433,7 @@ Invalid server response. Please try again or contact an administrator
 Unable to sign in. Please try again
 No supported access role found. Please contact an administrator
 The server took too long to respond. Your credentials have not been verified. Please try again
-Sign in to Classora
+Sign in to AttendHub
 Keep me signed in
 Verifying account...
 Opening your workspace...

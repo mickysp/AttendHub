@@ -188,7 +188,7 @@ export default function LoginForm() {
           md:mt-4
         "
       >
-        <h1 className="text-lg font-medium leading-relaxed">{tr("เข้าสู่ระบบ Attendance")}</h1>
+        <h1 className="text-lg font-medium leading-relaxed">{tr("เข้าสู่ระบบ AttendHub")}</h1>
 
         <div className="w-full">
           <input
