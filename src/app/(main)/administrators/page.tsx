@@ -1,7 +1,6 @@
 ﻿"use client";
 import { useLanguage } from "@/lib/language";
 
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { administratorsApi } from "@/services/api/administrators";
 import {
@@ -183,6 +182,7 @@ export default function AdministratorsPage() {
     setForm((current) => ({ ...current, [key]: value }));
     setFormErrors((current) => ({ ...current, [key]: "" }));
   }
+
   function changeRole(user: Administrator, role: AdministratorRole) {
     if (!canManage || busy || role === user.role) return;
     void showConfirm(
@@ -212,6 +212,7 @@ export default function AdministratorsPage() {
       `จาก ${user.role} เป็น ${role}`,
     );
   }
+
   function removeUser(user: Administrator) {
     if (!canManage) return;
     void showConfirm(
@@ -249,11 +250,16 @@ export default function AdministratorsPage() {
             </div>
           </div>
         )}
+
         <div className="flex min-w-0 flex-col rounded-2xl bg-white">
           <div className="flex shrink-0 flex-col px-6 pt-6 pb-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-[26px] font-semibold text-gray-800">{tr("ผู้ดูแลระบบ")}</h1>
-              <p className="mt-1 text-sm text-gray-400">{tr("จัดการบัญชีผู้ใช้และสิทธิ์ในระบบ")}</p>
+              <h1 className="text-[26px] font-semibold text-gray-800">
+                {tr("ผู้ดูแลระบบ")}
+              </h1>
+              <p className="mt-1 text-sm text-gray-400">
+                {tr("จัดการบัญชีผู้ใช้และสิทธิ์ในระบบ")}
+              </p>
             </div>
 
             {canCreate && (loading || error || users.length > 0) && (
@@ -262,7 +268,9 @@ export default function AdministratorsPage() {
                 onClick={() => setShowForm(true)}
                 className="mt-4 flex h-[40px] w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-[var(--primary)] px-6 py-2 text-[14px] text-white transition hover:bg-[var(--primary-hover)] md:mt-0 md:w-auto"
               >
-                <PlusIcon className="h-4 w-4" />{tr("เพิ่มผู้ใช้")}</button>
+                <PlusIcon className="h-4 w-4" />
+                {tr("เพิ่มผู้ใช้")}
+              </button>
             )}
           </div>
 
@@ -278,8 +286,8 @@ export default function AdministratorsPage() {
           )}
 
           {(loading || error || users.length > 0) && (
-            <p className="mt-6 mb-4 px-6 font-semibold text-gray-600">{tr("ผู้ใช้ทั้งหมด")}{" "}{users.length}{" "}{tr("รายการ")}{" "}{(keyword || roleFilter !== "all") &&
-                tr(" · พบ {0} รายการ", {0: filtered.length})}
+            <p className="mt-6 mb-4 px-6 font-semibold text-gray-600">
+              {tr("ผู้ใช้ทั้งหมด")} {filtered.length} {tr("รายการ")}{" "}
             </p>
           )}
 
@@ -331,7 +339,9 @@ export default function AdministratorsPage() {
                 <h2
                   id="admin-dialog-title"
                   className="text-lg font-semibold text-gray-800"
-                >{tr("เพิ่มผู้ใช้")}</h2>
+                >
+                  {tr("เพิ่มผู้ใช้")}
+                </h2>
               </div>
               <button
                 type="button"
@@ -343,14 +353,20 @@ export default function AdministratorsPage() {
                 <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
+
             <form noValidate onSubmit={(e) => void addUser(e)}>
-              <p className="mb-5 text-sm text-gray-500">{tr("กรอกข้อมูลเพื่อสร้างบัญชีให้ผู้ใช้ใหม่")}</p>
-              <div className="space-y-4 rounded-xl border border-gray-100 bg-[var(--card)] p-4 sm:p-5">
+              <p className="mb-5 text-sm text-gray-500">
+                {tr("กรอกข้อมูลเพื่อสร้างบัญชีให้ผู้ใช้ใหม่")}
+              </p>
+
+              <div className="space-y-4 rounded-xl border border-gray-100 bg-(--card) p-4 sm:p-5">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-[150px_minmax(0,1fr)]">
                   <div
                     ref={formPrefixRef}
                     className="relative text-sm font-medium text-gray-700"
-                  >{tr("คำนำหน้า")}<button
+                  >
+                    {tr("คำนำหน้า")}
+                    <button
                       type="button"
                       aria-label={tr("เลือกคำนำหน้า")}
                       aria-expanded={openFormPrefix}
@@ -362,6 +378,7 @@ export default function AdministratorsPage() {
                       </span>
                       <ChevronDownIcon className="h-4 w-4 shrink-0 text-gray-400" />
                     </button>
+
                     {openFormPrefix && (
                       <div className="absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg">
                         {USER_PREFIXES.map((prefix) => (
@@ -388,7 +405,10 @@ export default function AdministratorsPage() {
                       </span>
                     )}
                   </div>
-                  <label className="block text-sm font-medium text-gray-700">{tr("ชื่อ-นามสกุล")}<input
+
+                  <label className="block text-sm font-medium text-gray-700">
+                    {tr("ชื่อ-นามสกุล")}
+                    <input
                       required
                       autoComplete="name"
                       value={form.fullname}
@@ -406,7 +426,9 @@ export default function AdministratorsPage() {
                   </label>
                 </div>
 
-                <label className="block text-sm font-medium text-gray-700">{tr("ชื่อผู้ใช้")}<input
+                <label className="block text-sm font-medium text-gray-700">
+                  {tr("ชื่อผู้ใช้")}
+                  <input
                     required
                     autoComplete="off"
                     value={form.username}
@@ -423,7 +445,9 @@ export default function AdministratorsPage() {
                   )}
                 </label>
 
-                <label className="block text-sm font-medium text-gray-700">{tr("อีเมล")}<input
+                <label className="block text-sm font-medium text-gray-700">
+                  {tr("อีเมล")}
+                  <input
                     required
                     type="email"
                     autoComplete="off"
@@ -441,7 +465,9 @@ export default function AdministratorsPage() {
                   )}
                 </label>
 
-                <label className="block text-sm font-medium text-gray-700">{tr("รหัสผ่าน")}<span className="relative mt-1 block">
+                <label className="block text-sm font-medium text-gray-700">
+                  {tr("รหัสผ่าน")}
+                  <span className="relative mt-1 block">
                     <input
                       required
                       type={showPassword ? "text" : "password"}
@@ -479,7 +505,9 @@ export default function AdministratorsPage() {
                 <div
                   ref={formRoleRef}
                   className="relative text-sm font-medium text-gray-700"
-                >{tr("สิทธิ์")}<button
+                >
+                  {tr("สิทธิ์")}
+                  <button
                     type="button"
                     aria-label={tr("สิทธิ์ผู้ใช้ใหม่")}
                     aria-expanded={openFormRole}
@@ -492,10 +520,15 @@ export default function AdministratorsPage() {
                       <ChevronDownIcon className="h-4 w-4 text-gray-400" />
                     )}
                   </button>
+
                   {canManage && openFormRole && (
                     <div className="absolute bottom-full left-0 z-30 mb-1 w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg">
                       {(
-                        ["Teaching Assistant", "Teacher"] as AdministratorRole[]
+                        [
+                          "Admin",
+                          "Teacher",
+                          "Teaching Assistant",
+                        ] as AdministratorRole[]
                       ).map((role) => (
                         <button
                           key={role}
@@ -522,12 +555,16 @@ export default function AdministratorsPage() {
                   type="button"
                   onClick={() => setShowForm(false)}
                   className="cursor-pointer rounded-md border border-gray-200 px-5 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >{tr("ยกเลิก")}</button>
+                >
+                  {tr("ยกเลิก")}
+                </button>
                 <button
                   disabled={busy}
                   type="submit"
                   className="cursor-pointer rounded-md bg-[var(--primary)] px-5 py-2 text-sm text-white hover:bg-[var(--primary-hover)] disabled:opacity-50"
-                >{tr("บันทึก")}</button>
+                >
+                  {tr("บันทึก")}
+                </button>
               </div>
             </form>
           </div>

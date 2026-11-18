@@ -1,7 +1,6 @@
 "use client";
 import { useLanguage } from "@/lib/language";
 
-
 import { useEffect, useRef, useState } from "react";
 import {
   ChevronDownIcon,
@@ -45,6 +44,7 @@ export default function AdministratorSelect({
 
   const roles = [
     { value: "all", label: "ทั้งหมด" },
+    { value: "Admin", label: "Admin" },
     { value: "Teacher", label: "Teacher" },
     { value: "Teaching Assistant", label: "Teaching Assistant" },
   ];
@@ -60,6 +60,7 @@ export default function AdministratorSelect({
           placeholder={tr("ค้นหาชื่อ ชื่อผู้ใช้ หรืออีเมล")}
           className="w-full rounded-md border border-gray-200 py-[9px] pl-9 pr-9 text-[14px] text-gray-700 outline-none focus:ring-1 focus:ring-gray-200"
         />
+        
         {keyword && (
           <button
             type="button"
@@ -109,7 +110,9 @@ export default function AdministratorSelect({
         type="button"
         onClick={() => onKeywordChange("")}
         className="cursor-pointer self-center whitespace-nowrap text-[13px] text-blue-500 hover:underline md:self-auto"
-      >{tr("ล้างค่า")}</button>
+      >
+        {tr("ล้างค่า")}
+      </button>
     </div>
   );
 }

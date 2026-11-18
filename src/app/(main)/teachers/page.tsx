@@ -202,7 +202,7 @@ export default function TeachersPage() {
             <div className="shrink-0 px-6">
               <TeacherSelect keyword={keyword} onKeywordChange={setKeyword} />
 
-              <p className="mt-6 mb-4 font-semibold text-gray-600">{tr("อาจารย์ ทั้งหมด")}{" "}{teachers.length}{" "}{tr("รายการ")}{" "}{keyword.trim() && tr(" · พบ {0} รายการ", {0: filtered.length})}
+              <p className="mt-6 mb-4 font-semibold text-gray-600">{tr("อาจารย์ ทั้งหมด")}{" "}{filtered.length}{" "}{tr("รายการ")}{" "}
               </p>
             </div>
 

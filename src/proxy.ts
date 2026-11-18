@@ -20,6 +20,7 @@ export async function proxy(req: NextRequest) {
     "/api/auth/reset-password",
     "/api/auth/user",
   ].includes(pathname);
+
   if (
     publicStudentApi ||
     publicAuthApi ||
@@ -54,16 +55,15 @@ export async function proxy(req: NextRequest) {
       return response;
     }
 
-    if (pathname === "/login")
+    if (pathname === "/login") {
       return NextResponse.redirect(
-        new URL(
-          user.role === "Teacher" ? "/dashboard" : "/attendance",
-          req.url,
-        ),
+        new URL(user.role === "Admin" ? "/dashboard" : "/classes", req.url),
       );
-      
-    if (pathname.startsWith("/dashboard") && user.role !== "Teacher")
-      return NextResponse.redirect(new URL("/attendance", req.url));
+    }
+
+    if (pathname.startsWith("/dashboard") && user.role !== "Admin") {
+      return NextResponse.redirect(new URL("/classes", req.url));
+    }
     return NextResponse.next();
   } catch {
     if (publicPage) return NextResponse.next();

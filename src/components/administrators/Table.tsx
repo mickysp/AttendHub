@@ -1,7 +1,6 @@
 "use client";
 import { useLanguage } from "@/lib/language";
 
-
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -127,7 +126,7 @@ export default function AdministratorTable({
       return;
     }
     const rect = event.currentTarget.getBoundingClientRect();
-    const menuHeight = 82;
+    const menuHeight = 120;
     const above =
       window.innerHeight - rect.bottom < menuHeight + 8 &&
       rect.top > menuHeight + 8;
@@ -151,7 +150,9 @@ export default function AdministratorTable({
           type="button"
           onClick={onRetry}
           className="mt-3 cursor-pointer underline"
-        >{tr("ลองอีกครั้ง")}</button>
+        >
+          {tr("ลองอีกครั้ง")}
+        </button>
       </div>
     );
   if (!users.length) {
@@ -161,17 +162,23 @@ export default function AdministratorTable({
         <EmptyStateIcon kind={noData ? "students" : "search"} />
         {noData ? (
           <>
-            <p className="mb-4 text-sm text-gray-400">{tr("ยังไม่มีข้อมูลผู้ใช้ในระบบ")}</p>
+            <p className="mb-4 text-sm text-gray-400">
+              {tr("ยังไม่มีข้อมูลผู้ใช้ในระบบ")}
+            </p>
             {canCreate && (
               <button
                 type="button"
                 onClick={onAdd}
                 className="flex cursor-pointer items-center gap-2 rounded-md bg-[var(--primary)] px-5 py-2.5 text-sm text-white shadow-sm transition hover:bg-[var(--primary-hover)]"
-              >{tr("+ เพิ่มผู้ใช้")}</button>
+              >
+                {tr("+ เพิ่มผู้ใช้")}
+              </button>
             )}
           </>
         ) : (
-          <p className="whitespace-nowrap text-sm text-gray-500">{tr("ไม่พบข้อมูลที่ค้นหา กรุณาลองใหม่อีกครั้ง")}</p>
+          <p className="whitespace-nowrap text-sm text-gray-500">
+            {tr("ไม่พบข้อมูลที่ค้นหา กรุณาลองใหม่อีกครั้ง")}
+          </p>
         )}
       </div>
     );
@@ -182,7 +189,7 @@ export default function AdministratorTable({
       <button
         type="button"
         data-admin-role-trigger
-        aria-label={tr("สิทธิ์ของ {0}", {0: user.fullname})}
+        aria-label={tr("สิทธิ์ของ {0}", { 0: user.fullname })}
         aria-expanded={openRoleId === user._id}
         disabled={busy || user._id === currentUserId}
         onClick={(event) => toggleRole(user, event)}
@@ -200,7 +207,7 @@ export default function AdministratorTable({
   const deleteButton = (user: Administrator) => (
     <button
       type="button"
-      aria-label={tr("ลบ {0}", {0: user.fullname})}
+      aria-label={tr("ลบ {0}", { 0: user.fullname })}
       disabled={busy || user._id === currentUserId}
       onClick={() => onDelete(user)}
       className="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-md border border-red-200 px-2.5 py-1.5 text-sm text-red-500 hover:bg-red-50 disabled:opacity-40"
@@ -231,22 +238,34 @@ export default function AdministratorTable({
           </div>
         ))}
       </div>
+
       <div className="hidden overflow-hidden rounded-xl border border-gray-200 md:block">
         <div className="max-h-[510px] overflow-auto">
           <table className="app-data-table w-full min-w-[760px] table-fixed text-sm">
             <thead className="text-gray-600">
               <tr>
-                <th className="sticky top-0 z-10 w-[22%] bg-gray-50 px-3 text-left font-semibold">{tr("ชื่อ-นามสกุล")}</th>
-                <th className="sticky top-0 z-10 w-[17%] bg-gray-50 px-3 text-left font-semibold">{tr("ชื่อผู้ใช้")}</th>
-                <th className="sticky top-0 z-10 w-[25%] bg-gray-50 px-3 text-left font-semibold">{tr("อีเมล")}</th>
+                <th className="sticky top-0 z-10 w-[22%] bg-gray-50 px-3 text-left font-semibold">
+                  {tr("ชื่อ-นามสกุล")}
+                </th>
+                <th className="sticky top-0 z-10 w-[17%] bg-gray-50 px-3 text-left font-semibold">
+                  {tr("ชื่อผู้ใช้")}
+                </th>
+                <th className="sticky top-0 z-10 w-[25%] bg-gray-50 px-3 text-left font-semibold">
+                  {tr("อีเมล")}
+                </th>
                 <th
                   className={`sticky top-0 z-10 bg-gray-50 px-3 text-left font-semibold ${canManage ? "w-[25%]" : "w-[36%]"}`}
-                >{tr("สิทธิ์ปัจจุบัน")}</th>
+                >
+                  {tr("สิทธิ์ปัจจุบัน")}
+                </th>
                 {canManage && (
-                  <th className="sticky top-0 z-10 w-[11%] bg-gray-50 px-3 text-left font-semibold">{tr("จัดการ")}</th>
+                  <th className="sticky top-0 z-10 w-[11%] bg-gray-50 px-3 text-left font-semibold">
+                    {tr("จัดการ")}
+                  </th>
                 )}
               </tr>
             </thead>
+
             <tbody>
               {visible.map((user) => (
                 <tr
@@ -308,7 +327,9 @@ export default function AdministratorTable({
                 </div>
               )}
             </div>
-            <span>{tr("จากทั้งหมด")}{" "}{users.length}{" "}{tr("รายการ")}</span>
+            <span>
+              {tr("จากทั้งหมด")} {users.length} {tr("รายการ")}
+            </span>
           </div>
 
           <div className="flex items-center justify-center gap-1.5">
@@ -317,7 +338,10 @@ export default function AdministratorTable({
               disabled={currentPage === 1}
               onClick={() => setPage(currentPage - 1)}
               className="cursor-pointer rounded-md border border-gray-200 px-3 py-2 hover:bg-gray-100 disabled:opacity-40"
-            >{tr("ก่อนหน้า")}</button>
+            >
+              {tr("ก่อนหน้า")}
+            </button>
+
             {visiblePages.map((number) => (
               <button
                 key={number}
@@ -329,12 +353,15 @@ export default function AdministratorTable({
                 {number}
               </button>
             ))}
+
             <button
               type="button"
               disabled={currentPage === totalPages}
               onClick={() => setPage(currentPage + 1)}
               className="cursor-pointer rounded-md border border-gray-200 px-3 py-2 hover:bg-gray-100 disabled:opacity-40"
-            >{tr("ถัดไป")}</button>
+            >
+              {tr("ถัดไป")}
+            </button>
           </div>
         </div>
       )}
@@ -352,24 +379,24 @@ export default function AdministratorTable({
             }}
             className="z-[100] overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
           >
-            {(["Teacher", "Teaching Assistant"] as AdministratorRole[]).map(
-              (role) => (
-                <button
-                  key={role}
-                  type="button"
-                  onClick={() => {
-                    const user = users.find((item) => item._id === openRoleId);
-                    if (user) onChangeRole(user, role);
-                    setOpenRoleId(null);
-                  }}
-                  className={`flex w-full cursor-pointer items-center justify-between px-4 py-2 text-left text-sm ${users.find((item) => item._id === openRoleId)?.role === role ? "bg-blue-50 font-medium text-blue-600" : "text-gray-700 hover:bg-gray-100"}`}
-                >
-                  {role}
-                  {users.find((item) => item._id === openRoleId)?.role ===
-                    role && <CheckIcon className="h-4 w-4" />}
-                </button>
-              ),
-            )}
+            {(
+              ["Admin", "Teacher", "Teaching Assistant"] as AdministratorRole[]
+            ).map((role) => (
+              <button
+                key={role}
+                type="button"
+                onClick={() => {
+                  const user = users.find((item) => item._id === openRoleId);
+                  if (user) onChangeRole(user, role);
+                  setOpenRoleId(null);
+                }}
+                className={`flex w-full cursor-pointer items-center justify-between px-4 py-2 text-left text-sm ${users.find((item) => item._id === openRoleId)?.role === role ? "bg-blue-50 font-medium text-blue-600" : "text-gray-700 hover:bg-gray-100"}`}
+              >
+                {role}
+                {users.find((item) => item._id === openRoleId)?.role ===
+                  role && <CheckIcon className="h-4 w-4" />}
+              </button>
+            ))}
           </div>,
           document.body,
         )}

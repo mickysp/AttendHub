@@ -338,6 +338,7 @@ export default function Sidebar() {
           <SidebarMenu
             pathname={pathname}
             collapsed={false}
+            role={user.role}
             onNavigate={handleNavigate}
           />
         </div>
@@ -435,6 +436,7 @@ export default function Sidebar() {
           <SidebarMenu
             pathname={pathname}
             collapsed={desktopCollapsed}
+            role={user.role}
             onNavigate={handleNavigate}
           />
         </div>
@@ -455,10 +457,16 @@ export default function Sidebar() {
 type SidebarMenuProps = {
   pathname: string;
   collapsed: boolean;
+  role: string;
   onNavigate: (path: string) => void;
 };
 
-function SidebarMenu({ pathname, collapsed, onNavigate }: SidebarMenuProps) {
+function SidebarMenu({
+  pathname,
+  collapsed,
+  role,
+  onNavigate,
+}: SidebarMenuProps) {
   const { language, t } = useLanguage();
   return (
     <nav lang={language} className="flex flex-col gap-6 text-sm font-medium">
@@ -467,13 +475,15 @@ function SidebarMenu({ pathname, collapsed, onNavigate }: SidebarMenuProps) {
       )}
 
       <div className="flex flex-col gap-2">
-        <SidebarItem
-          icon={<HomeIcon />}
-          label={t.dashboard}
-          collapsed={collapsed}
-          active={pathname === "/dashboard"}
-          onClick={() => onNavigate("/dashboard")}
-        />
+        {role === "Admin" && (
+          <SidebarItem
+            icon={<HomeIcon />}
+            label={t.dashboard}
+            collapsed={collapsed}
+            active={pathname === "/dashboard"}
+            onClick={() => onNavigate("/dashboard")}
+          />
+        )}
 
         <SidebarItem
           icon={<BookOpenIcon />}

@@ -30,17 +30,64 @@ export default function DashboardPage() {
   const [weekly, setWeekly] = useState<DashboardWeeklyItem[]>([]);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
   const [error, setError] = useState("");
+  const [authorized, setAuthorized] = useState(false);
+  const [checkingRole, setCheckingRole] = useState(true);
 
   useEffect(() => {
     const controller = new AbortController();
+
+    async function checkAdmin() {
+      try {
+        const response = await fetch("/api/auth/me", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          window.location.href = "/login";
+          return;
+        }
+
+        const result = await response.json();
+        const role = result.user?.role;
+
+        if (role !== "Admin") {
+          window.location.href = "/";
+          return;
+        }
+
+        setAuthorized(true);
+      } catch {
+        if (!controller.signal.aborted) {
+          window.location.href = "/login";
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setCheckingRole(false);
+        }
+      }
+    }
+
+    void checkAdmin();
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!authorized) return;
+
+    const controller = new AbortController();
+
     async function loadDashboard() {
       setLoadingDashboard(true);
       setError("");
       setOverview(null);
       setRanking(null);
       setWeekly([]);
+
       try {
         const query = { year: selectedYear };
+
         const responses = await Promise.all([
           dashboardApi.overview(query, {
             signal: controller.signal,
@@ -55,10 +102,13 @@ export default function DashboardPage() {
             cache: "no-store",
           }),
         ]);
+
         const [overviewData, rankingData, weeklyData] = await Promise.all(
           responses.map((response) => response.json()),
         );
+
         const failedIndex = responses.findIndex((response) => !response.ok);
+
         if (
           failedIndex >= 0 ||
           !overviewData.success ||
@@ -72,28 +122,37 @@ export default function DashboardPage() {
               "โหลดแดชบอร์ดไม่สำเร็จ",
           );
         }
+
         if (!controller.signal.aborted) {
           setOverview(overviewData);
+
           setYears(
             Array.isArray(overviewData.years)
               ? overviewData.years
               : [selectedYear],
           );
+
           setRanking(rankingData);
+
           setWeekly(Array.isArray(weeklyData.data) ? weeklyData.data : []);
         }
       } catch (cause) {
-        if (!controller.signal.aborted)
+        if (!controller.signal.aborted) {
           setError(
             cause instanceof Error ? cause.message : "โหลดแดชบอร์ดไม่สำเร็จ",
           );
+        }
       } finally {
-        if (!controller.signal.aborted) setLoadingDashboard(false);
+        if (!controller.signal.aborted) {
+          setLoadingDashboard(false);
+        }
       }
     }
+
     void loadDashboard();
+
     return () => controller.abort();
-  }, [selectedYear]);
+  }, [selectedYear, authorized]);
 
   const cards = useMemo(
     () => [
@@ -124,6 +183,14 @@ export default function DashboardPage() {
     ],
     [overview],
   );
+
+  if (checkingRole) {
+    return <PageLoading />;
+  }
+
+  if (!authorized) {
+    return null;
+  }
 
   return (
     <div className="app-page dashboard-page" aria-busy={loadingDashboard}>
