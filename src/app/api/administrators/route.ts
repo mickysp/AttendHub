@@ -10,7 +10,7 @@ import {
   validPassword,
 } from "@/lib/user-validation";
 
-const roles = ["Teacher", "Teaching Assistant"];
+const roles = ["Admin", "Teacher", "Teaching Assistant"];
 const forbidden = () =>
   NextResponse.json(
     { success: false, message: "ไม่มีสิทธิ์จัดการผู้ใช้" },
@@ -22,6 +22,7 @@ const invalid = (message: string) =>
 export async function GET() {
   const actor = await currentUser();
   if (!actor || !roles.includes(actor.role)) return forbidden();
+
   const users = await (
     await clientPromise
   )
@@ -30,19 +31,22 @@ export async function GET() {
     .find({}, { projection: { password: 0 } })
     .sort({ createdAt: -1 })
     .toArray();
+
   return NextResponse.json({
     success: true,
     data: users.map((user) => ({ ...user, _id: String(user._id) })),
     currentUserId: String(actor._id),
-    canManage: actor.role === "Teacher",
+    canManage: ["Admin", "Teacher"].includes(actor.role),
     canCreate: true,
   });
 }
 
 export async function POST(req: Request) {
   const actor = await currentUser();
+
   if (!actor || !roles.includes(actor.role)) return forbidden();
   const body = await req.json().catch(() => null);
+
   if (!body || typeof body !== "object") return invalid("ข้อมูลไม่ถูกต้อง");
   const prefix = typeof body.prefix === "string" ? body.prefix.trim() : "";
   const fullname =
@@ -52,18 +56,29 @@ export async function POST(req: Request) {
   const email =
     typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   const password = body.password;
+
   if (!USER_PREFIXES.some((item) => item === prefix))
     return invalid("กรุณาเลือกคำนำหน้า");
+
   if (!fullname || !username || !roles.includes(body.role))
     return invalid("กรอกข้อมูลให้ครบและเลือกสิทธิ์ที่ถูกต้อง");
-  if (actor.role === "Teaching Assistant" && body.role !== "Teaching Assistant")
+
+  if (
+    actor.role === "Teaching Assistant" &&
+    body.role !== "Teaching Assistant"
+  ) {
     return forbidden();
+  }
+
   if (!validEmail(email)) return invalid("อีเมลไม่ถูกต้อง");
+
   if (typeof password !== "string" || !validPassword(password))
     return invalid(
       "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร และมีตัวอักษรภาษาอังกฤษกับตัวเลข",
     );
+
   const users = (await clientPromise).db("attendance").collection("users");
+
   await Promise.all([
     users.createIndex(
       { username: 1 },
@@ -73,6 +88,7 @@ export async function POST(req: Request) {
         collation: { locale: "en", strength: 2 },
       },
     ),
+
     users.createIndex(
       { email: 1 },
       {
@@ -82,6 +98,7 @@ export async function POST(req: Request) {
       },
     ),
   ]);
+
   if (
     await users.findOne(
       { username },
@@ -107,6 +124,7 @@ export async function POST(req: Request) {
       email,
       password: await bcrypt.hash(password, 10),
       role: body.role,
+      sessionVersion: 0,
       createdAt: new Date(),
     });
   } catch (error) {
@@ -122,6 +140,7 @@ export async function POST(req: Request) {
       );
     throw error;
   }
+
   await recordActivity({
     actor,
     category: "accounts",
@@ -129,6 +148,7 @@ export async function POST(req: Request) {
     message: `เพิ่มบัญชีผู้ใช้ “${fullname}”`,
     target: fullname,
   });
+
   return NextResponse.json(
     { success: true, message: "เพิ่มผู้ใช้สำเร็จ" },
     { status: 201 },
@@ -137,24 +157,40 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   const actor = await currentUser();
-  if (!actor || actor.role !== "Teacher") return forbidden();
+  
+  if (!actor || !["Admin", "Teacher"].includes(actor.role)) return forbidden();
   const body = await req.json().catch(() => null);
+
   if (!body || !ObjectId.isValid(body.id ?? "") || !roles.includes(body.role))
     return invalid("ข้อมูลไม่ถูกต้อง");
   if (String(actor._id) === body.id)
     return invalid("ไม่สามารถแก้ไขสิทธิ์ของตนเอง");
+
   const users = (await clientPromise).db("attendance").collection("users");
   const target = await users.findOne({ _id: new ObjectId(body.id) });
+
+  if (target?.role === body.role)
+    return NextResponse.json({
+      success: true,
+      message: "สิทธิ์ไม่มีการเปลี่ยนแปลง",
+    });
+
   const result = await users.updateOne(
     { _id: new ObjectId(body.id) },
-    { $set: { role: body.role } },
+    {
+      $set: { role: body.role, sessionRevokedReason: "role_changed" },
+      $inc: { sessionVersion: 1 },
+    },
   );
+
   if (!result.matchedCount)
     return NextResponse.json(
       { success: false, message: "ไม่พบผู้ใช้" },
       { status: 404 },
     );
+
   const targetName = String(target?.fullname ?? target?.username ?? "ผู้ใช้");
+
   await recordActivity({
     actor,
     category: "accounts",
@@ -167,14 +203,20 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   const actor = await currentUser();
-  if (!actor || actor.role !== "Teacher") return forbidden();
+
+  if (!actor || !["Admin", "Teacher"].includes(actor.role)) return forbidden();
+
   const body = await req.json().catch(() => null);
+
   if (!body || !ObjectId.isValid(body.id ?? ""))
     return invalid("ข้อมูลไม่ถูกต้อง");
+
   if (String(actor._id) === body.id) return invalid("ไม่สามารถลบบัญชีของตนเอง");
+
   const users = (await clientPromise).db("attendance").collection("users");
   const target = await users.findOne({ _id: new ObjectId(body.id) });
   const result = await users.deleteOne({ _id: new ObjectId(body.id) });
+
   if (!result.deletedCount)
     return NextResponse.json(
       { success: false, message: "ไม่พบผู้ใช้" },
@@ -186,6 +228,7 @@ export async function DELETE(req: Request) {
     .db("attendance")
     .collection("profile_images")
     .deleteOne({ _id: new ObjectId(body.id) });
+
   const targetName = String(target?.fullname ?? target?.username ?? "ผู้ใช้");
   await recordActivity({
     actor,

@@ -1,5 +1,7 @@
-export type AdministratorRole = "Teacher" | "Teaching Assistant";
-
+export type AdministratorRole =
+  | "Admin"
+  | "Teacher"
+  | "Teaching Assistant";
 export interface Administrator {
   _id: string;
   prefix: string;

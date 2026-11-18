@@ -1,7 +1,10 @@
 "use client";
+import { useLanguage, getLocale } from "@/lib/language";
 
 import {
+  ArrowTrendingUpIcon,
   BookOpenIcon,
+  CalendarDaysIcon,
   ChartBarIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
@@ -18,6 +21,8 @@ import type {
 } from "@/types/dashboard";
 
 export default function DashboardPage() {
+  const { tr } = useLanguage();
+
   const [years, setYears] = useState<number[]>([]);
   const [selectedYear, setSelectedYear] = useState(getCurrentAcademicYear);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
@@ -25,17 +30,64 @@ export default function DashboardPage() {
   const [weekly, setWeekly] = useState<DashboardWeeklyItem[]>([]);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
   const [error, setError] = useState("");
+  const [authorized, setAuthorized] = useState(false);
+  const [checkingRole, setCheckingRole] = useState(true);
 
   useEffect(() => {
     const controller = new AbortController();
+
+    async function checkAdmin() {
+      try {
+        const response = await fetch("/api/auth/me", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          window.location.href = "/login";
+          return;
+        }
+
+        const result = await response.json();
+        const role = result.user?.role;
+
+        if (role !== "Admin") {
+          window.location.href = "/";
+          return;
+        }
+
+        setAuthorized(true);
+      } catch {
+        if (!controller.signal.aborted) {
+          window.location.href = "/login";
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setCheckingRole(false);
+        }
+      }
+    }
+
+    void checkAdmin();
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!authorized) return;
+
+    const controller = new AbortController();
+
     async function loadDashboard() {
       setLoadingDashboard(true);
       setError("");
       setOverview(null);
       setRanking(null);
       setWeekly([]);
+
       try {
         const query = { year: selectedYear };
+
         const responses = await Promise.all([
           dashboardApi.overview(query, {
             signal: controller.signal,
@@ -50,10 +102,13 @@ export default function DashboardPage() {
             cache: "no-store",
           }),
         ]);
+
         const [overviewData, rankingData, weeklyData] = await Promise.all(
           responses.map((response) => response.json()),
         );
+
         const failedIndex = responses.findIndex((response) => !response.ok);
+
         if (
           failedIndex >= 0 ||
           !overviewData.success ||
@@ -67,28 +122,37 @@ export default function DashboardPage() {
               "โหลดแดชบอร์ดไม่สำเร็จ",
           );
         }
+
         if (!controller.signal.aborted) {
           setOverview(overviewData);
+
           setYears(
             Array.isArray(overviewData.years)
               ? overviewData.years
               : [selectedYear],
           );
+
           setRanking(rankingData);
+
           setWeekly(Array.isArray(weeklyData.data) ? weeklyData.data : []);
         }
       } catch (cause) {
-        if (!controller.signal.aborted)
+        if (!controller.signal.aborted) {
           setError(
             cause instanceof Error ? cause.message : "โหลดแดชบอร์ดไม่สำเร็จ",
           );
+        }
       } finally {
-        if (!controller.signal.aborted) setLoadingDashboard(false);
+        if (!controller.signal.aborted) {
+          setLoadingDashboard(false);
+        }
       }
     }
+
     void loadDashboard();
+
     return () => controller.abort();
-  }, [selectedYear]);
+  }, [selectedYear, authorized]);
 
   const cards = useMemo(
     () => [
@@ -109,31 +173,42 @@ export default function DashboardPage() {
         background: "bg-violet-50",
       },
       {
-        label: "เช็กชื่อทั้งหมด",
+        label: "เช็คชื่อทั้งหมด",
         value: overview?.totalRecords ?? 0,
         suffix: "รายการ",
         icon: CheckCircleIcon,
-        color: "text-emerald-600",
-        background: "bg-emerald-50",
+        color: "text-cyan-600",
+        background: "bg-cyan-50",
       },
     ],
     [overview],
   );
 
+  if (checkingRole) {
+    return <PageLoading />;
+  }
+
+  if (!authorized) {
+    return null;
+  }
+
   return (
-    <div className="app-page" aria-busy={loadingDashboard}>
+    <div className="app-page dashboard-page" aria-busy={loadingDashboard}>
       {loadingDashboard && <PageLoading />}
-      <div className="flex min-h-full flex-col gap-5 sm:gap-6">
-        <header className="app-page-header">
-          <div>
-            <h1 className="app-page-title">แดชบอร์ด</h1>
-            <p className="app-page-description">
-              ภาพรวมการเข้าเรียนและนักศึกษาที่ควรติดตาม
+      <div className="mx-auto flex min-h-full w-full max-w-[1600px] flex-col gap-5 p-4 sm:gap-6 sm:p-6 lg:p-8">
+        <header className="dashboard-hero flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
+          <div className="relative z-[1]">
+            <h1 className="text-[28px] font-semibold tracking-[-0.03em] text-slate-900 sm:text-[32px] dark:text-white">
+              {tr("แดชบอร์ด")}
+            </h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              {tr("ภาพรวมการเข้าเรียน")}
             </p>
           </div>
-          <div className="w-full sm:w-40">
-            <span className="mb-1.5 block text-xs font-medium text-gray-500">
-              ปีการศึกษา
+
+          <div className="min-w-0 flex-1 sm:w-40 sm:flex-none">
+            <span className="mb-0.5 block px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              {tr("ปีการศึกษา")}
             </span>
             <AttendanceDropdown
               value={String(selectedYear)}
@@ -141,8 +216,8 @@ export default function DashboardPage() {
                 value: String(year),
                 label: String(year),
               }))}
-              placeholder="เลือกปี"
-              ariaLabel="เลือกปีการศึกษา"
+              placeholder={tr("เลือกปี")}
+              ariaLabel={tr("เลือกปีการศึกษา")}
               allowEmpty={false}
               onChange={(value) => value && setSelectedYear(Number(value))}
             />
@@ -154,34 +229,36 @@ export default function DashboardPage() {
             role="alert"
             className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
           >
-            {error}
+            {tr(error)}
           </div>
         )}
 
         {overview ? (
-          <>
+          <div className="flex flex-col gap-5 sm:gap-6">
             <section
               className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-              aria-label="ข้อมูลสรุป"
+              aria-label={tr("ข้อมูลสรุป")}
             >
               {cards.map((card) => {
                 const Icon = card.icon;
                 return (
                   <article
                     key={card.label}
-                    className="app-card flex items-center gap-4 p-5"
+                    className="dashboard-card group flex min-w-0 items-center gap-4 p-5 sm:p-6"
                   >
                     <span
-                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${card.background} ${card.color}`}
+                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:-translate-y-1 ${card.background} ${card.color}`}
                     >
                       <Icon className="h-6 w-6" />
                     </span>
                     <div>
-                      <p className="text-sm text-gray-500">{card.label}</p>
-                      <p className="mt-1 text-2xl font-semibold text-gray-800">
-                        {card.value.toLocaleString("th-TH")}{" "}
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                        {tr(card.label)}
+                      </p>
+                      <p className="mt-1 text-[26px] font-semibold tracking-[-0.03em] text-slate-900 dark:text-white">
+                        {card.value.toLocaleString(getLocale())}{" "}
                         <span className="text-sm font-normal text-gray-400">
-                          {card.suffix}
+                          {tr(card.suffix)}
                         </span>
                       </p>
                     </div>
@@ -196,16 +273,17 @@ export default function DashboardPage() {
 
             <AttendanceDistribution overview={overview} />
 
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]">
-              <MonthlyChart data={weekly} />
-              <RecentActivity data={overview.recentActivity} />
+            <div className="grid items-start gap-5 sm:gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
+              <div className="flex min-w-0 flex-col gap-5 sm:gap-6">
+                <MonthlyChart data={weekly} />
+                <RiskTable data={overview.riskStudents} />
+              </div>
+              <div className="flex min-w-0 flex-col gap-5 sm:gap-6">
+                <RecentActivity data={overview.recentActivity} />
+                <RankingList data={ranking?.ranking.percent.top ?? []} />
+              </div>
             </div>
-
-            <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]">
-              <RiskTable data={overview.riskStudents} />
-              <RankingList data={ranking?.ranking.percent.top ?? []} />
-            </div>
-          </>
+          </div>
         ) : null}
       </div>
     </div>
@@ -213,30 +291,28 @@ export default function DashboardPage() {
 }
 
 function RiskSummaryCard({ count, total }: { count: number; total: number }) {
+  const { tr } = useLanguage();
+
   const rate = total > 0 ? Math.round((count / total) * 100) : 0;
   const hasRisk = count > 0;
 
   return (
-    <article
-      className={`relative overflow-hidden rounded-2xl border p-5 ${hasRisk ? "border-amber-200 bg-gradient-to-br from-amber-50 via-white to-orange-50" : "border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-teal-50"}`}
-    >
-      <div
-        className={`absolute -top-8 -right-8 h-28 w-28 rounded-full opacity-50 ${hasRisk ? "bg-amber-100" : "bg-emerald-100"}`}
-        aria-hidden="true"
-      />
+    <article className="dashboard-card relative min-w-0 overflow-hidden p-5 sm:p-6">
       <div className="relative flex items-start justify-between gap-4">
         <div>
           <span
             className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${hasRisk ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}
           >
-            {hasRisk ? "ควรตรวจสอบ" : "สถานะปกติ"}
+            {hasRisk ? tr("ควรตรวจสอบ") : tr("สถานะปกติ")}
           </span>
-          <p className="mt-3 text-sm font-medium text-gray-600">
-            นักศึกษาที่ควรติดตาม
+          <p className="mt-3 text-xs font-medium text-slate-500 dark:text-slate-400">
+            {tr("นักศึกษาที่ควรติดตาม")}
           </p>
-          <p className="mt-1 text-3xl font-semibold text-gray-900">
-            {count.toLocaleString("th-TH")}{" "}
-            <span className="text-sm font-normal text-gray-500">คน</span>
+          <p className="mt-1 text-[26px] font-semibold tracking-[-0.03em] text-slate-900 dark:text-white">
+            {count.toLocaleString(getLocale())}{" "}
+            <span className="text-sm font-normal text-gray-500">
+              {tr("คน")}
+            </span>
           </p>
         </div>
         <span
@@ -250,7 +326,7 @@ function RiskSummaryCard({ count, total }: { count: number; total: number }) {
         </span>
       </div>
       <div className="relative mt-4 flex items-center gap-3">
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/80">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
           <div
             className={`h-full rounded-full ${hasRisk ? "bg-amber-500" : "bg-emerald-500"}`}
             style={{ width: `${Math.min(rate, 100)}%` }}
@@ -267,6 +343,8 @@ function RiskSummaryCard({ count, total }: { count: number; total: number }) {
 }
 
 function AttendanceDistribution({ overview }: { overview: DashboardOverview }) {
+  const { tr } = useLanguage();
+
   const items = [
     {
       label: "มาเรียน",
@@ -289,19 +367,21 @@ function AttendanceDistribution({ overview }: { overview: DashboardOverview }) {
   ];
 
   return (
-    <section className="app-card overflow-hidden">
-      <div className="flex flex-col gap-3 border-b border-gray-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <section className="dashboard-card min-w-0 overflow-hidden">
+      <div className="flex flex-col gap-4 px-5 pt-5 pb-2 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:pt-6">
         <div>
-          <h2 className="text-lg font-semibold text-gray-800">
-            สถานะการเข้าเรียนทั้งระบบ
+          <h2 className="dashboard-section-title">
+            {tr("สถานะการเข้าเรียนทั้งระบบ")}
           </h2>
           <p className="mt-1 text-sm text-gray-500">
-            สัดส่วนจากรายการเช็กชื่อทั้งหมดในปีการศึกษานี้
+            {tr("สัดส่วนจากรายการเช็คชื่อทั้งหมดในปีการศึกษานี้")}
           </p>
         </div>
-        <div className="rounded-xl bg-blue-50 px-4 py-2 text-right">
-          <p className="text-xs text-blue-600">อัตราเข้าเรียนเฉลี่ย</p>
-          <p className="text-xl font-semibold text-blue-700">
+        <div className="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-2 text-right dark:border-blue-900 dark:bg-blue-950/50">
+          <p className="text-[11px] font-medium text-blue-700 dark:text-blue-300">
+            {tr("อัตราเข้าเรียนเฉลี่ย")}
+          </p>
+          <p className="text-xl font-semibold text-blue-800 dark:text-blue-200">
             {overview.average.percent.toFixed(0)}%
           </p>
         </div>
@@ -315,23 +395,23 @@ function AttendanceDistribution({ overview }: { overview: DashboardOverview }) {
             return (
               <div
                 key={item.label}
-                className="rounded-xl border border-gray-100 bg-gray-50/60 p-4"
+                className="min-w-0 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition-colors hover:border-slate-200 dark:border-slate-700 dark:bg-slate-800/50"
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
                     <span
                       className={`h-2.5 w-2.5 rounded-full ${item.color}`}
                     />
-                    {item.label}
+                    {tr(item.label)}
                   </span>
                   <span className={`text-sm font-semibold ${item.text}`}>
                     {rate.toFixed(0)}%
                   </span>
                 </div>
                 <p className="mt-3 text-2xl font-semibold text-gray-800">
-                  {item.value.toLocaleString("th-TH")}{" "}
+                  {item.value.toLocaleString(getLocale())}{" "}
                   <span className="text-xs font-normal text-gray-400">
-                    ครั้ง
+                    {tr("ครั้ง")}
                   </span>
                 </p>
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-200">
@@ -350,6 +430,8 @@ function AttendanceDistribution({ overview }: { overview: DashboardOverview }) {
 }
 
 function PageLoading() {
+  const { tr } = useLanguage();
+
   return (
     <div
       className="absolute inset-0 z-10 flex items-center justify-center bg-gray-300"
@@ -357,26 +439,33 @@ function PageLoading() {
     >
       <div className="flex flex-col items-center gap-4">
         <div className="h-14 w-14 animate-spin rounded-full border-4 border-white border-t-transparent" />
-        <p className="text-base text-white">กำลังโหลด...</p>
+        <p className="text-base text-white">{tr("กำลังโหลด...")}</p>
       </div>
     </div>
   );
 }
 
 function MonthlyChart({ data }: { data: DashboardWeeklyItem[] }) {
+  const { tr } = useLanguage();
+
   const maximum = Math.max(
     1,
     ...data.map((item) => item.present + item.late + item.leave),
   );
   return (
-    <section className="app-card overflow-hidden">
-      <div className="border-b border-gray-100 px-5 py-5 sm:px-6">
-        <h2 className="text-lg font-semibold text-gray-800">
-          แนวโน้มการเข้าเรียน
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">
-          จำนวนการเช็คชื่อแยกตามเดือน
-        </p>
+    <section className="dashboard-card min-w-0 overflow-hidden">
+      <div className="flex items-start justify-between gap-4 px-5 pt-5 pb-2 sm:px-6 sm:pt-6">
+        <div>
+          <h2 className="dashboard-section-title">
+            {tr("แนวโน้มการเข้าเรียน")}
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">
+            {tr("จำนวนการเช็คชื่อแยกตามเดือน")}
+          </p>
+        </div>
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+          <ArrowTrendingUpIcon className="h-4.5 w-4.5" />
+        </span>
       </div>
       {data.length === 0 ? (
         <SmallEmpty text="ยังไม่มีข้อมูลแนวโน้ม" />
@@ -391,10 +480,10 @@ function MonthlyChart({ data }: { data: DashboardWeeklyItem[] }) {
                     {formatMonth(item.week)}
                   </span>
                   <span className="text-gray-500">
-                    {total.toLocaleString("th-TH")} รายการ
+                    {total.toLocaleString(getLocale())} {tr("รายการ")}
                   </span>
                 </div>
-                <div className="flex h-3 overflow-hidden rounded-full bg-gray-100">
+                <div className="flex h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                   <span
                     className="bg-emerald-500"
                     style={{ width: `${(item.present / maximum) * 100}%` }}
@@ -412,9 +501,9 @@ function MonthlyChart({ data }: { data: DashboardWeeklyItem[] }) {
             );
           })}
           <div className="flex flex-wrap gap-4 border-t border-gray-100 pt-4 text-xs text-gray-500">
-            <Legend color="bg-emerald-500" label="มาเรียน" />
-            <Legend color="bg-amber-400" label="มาสาย" />
-            <Legend color="bg-sky-400" label="ลา" />
+            <Legend color="bg-emerald-500" label={tr("มาเรียน")} />
+            <Legend color="bg-amber-400" label={tr("มาสาย")} />
+            <Legend color="bg-sky-400" label={tr("ลา")} />
           </div>
         </div>
       )}
@@ -427,14 +516,14 @@ function RankingList({
 }: {
   data: DashboardRanking["ranking"]["percent"]["top"];
 }) {
+  const { tr } = useLanguage();
+
   return (
-    <section className="app-card overflow-hidden">
-      <div className="border-b border-gray-100 px-5 py-5 sm:px-6">
-        <h2 className="text-lg font-semibold text-gray-800">
-          เข้าเรียนสม่ำเสมอ
-        </h2>
+    <section className="dashboard-card min-w-0 overflow-hidden">
+      <div className="px-5 pt-5 pb-2 sm:px-6 sm:pt-6">
+        <h2 className="dashboard-section-title">{tr("เข้าเรียนสม่ำเสมอ")}</h2>
         <p className="mt-1 text-sm text-gray-500">
-          5 อันดับตามอัตราการเข้าเรียน
+          {tr("5 อันดับตามอัตราการเข้าเรียน")}
         </p>
       </div>
       {data.length === 0 ? (
@@ -444,20 +533,20 @@ function RankingList({
           {data.map((student, index) => (
             <li
               key={student.studentId}
-              className="flex items-center gap-3 py-4"
+              className="group flex items-center gap-3 py-4"
             >
               <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${index < 3 ? "bg-blue-50 text-blue-600" : "bg-gray-100 text-gray-500"}`}
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-sm font-semibold transition-transform group-hover:scale-105 ${index < 3 ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300" : "bg-gray-100 text-gray-500"}`}
               >
                 {index + 1}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-gray-800">
-                  {student.name || "ไม่ระบุชื่อ"}
+                  {student.name || tr("ไม่ระบุชื่อ")}
                 </p>
                 <p className="text-xs text-gray-500">{student.studentId}</p>
               </div>
-              <span className="text-sm font-semibold text-emerald-600">
+              <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                 {student.percent.toFixed(0)}%
               </span>
             </li>
@@ -473,24 +562,24 @@ function RecentActivity({
 }: {
   data: DashboardOverview["recentActivity"];
 }) {
+  const { tr } = useLanguage();
+
   return (
-    <section className="app-card overflow-hidden">
-      <div className="border-b border-gray-100 px-5 py-5 sm:px-6">
-        <h2 className="text-lg font-semibold text-gray-800">
-          การเช็กชื่อล่าสุด
-        </h2>
+    <section className="dashboard-card min-w-0 overflow-hidden">
+      <div className="px-5 pt-5 pb-2 sm:px-6 sm:pt-6">
+        <h2 className="dashboard-section-title">{tr("การเช็คชื่อล่าสุด")}</h2>
         <p className="mt-1 text-sm text-gray-500">
-          ความเคลื่อนไหวล่าสุดจากทุกวิชา
+          {tr("ความเคลื่อนไหวล่าสุดจากทุกวิชา")}
         </p>
       </div>
       {data.length === 0 ? (
-        <SmallEmpty text="ยังไม่มีกิจกรรมการเช็กชื่อ" />
+        <SmallEmpty text="ยังไม่มีกิจกรรมการเช็คชื่อ" />
       ) : (
         <ul className="divide-y divide-gray-100 px-5 sm:px-6">
           {data.map((item, index) => (
             <li
               key={`${item.studentId}-${item.date}-${index}`}
-              className="flex items-start gap-3 py-4"
+              className="group flex items-start gap-3 py-4"
             >
               <span
                 className={`mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full ${item.status === "มาเรียน" ? "bg-emerald-500" : item.status === "มาสาย" ? "bg-amber-400" : "bg-sky-400"}`}
@@ -517,24 +606,26 @@ function RecentActivity({
 }
 
 function RiskTable({ data }: { data: DashboardOverview["riskStudents"] }) {
+  const { tr } = useLanguage();
+
   return (
-    <section className="overflow-hidden rounded-2xl border border-amber-100 bg-white">
-      <div className="flex flex-col gap-3 border-b border-amber-100 bg-gradient-to-r from-amber-50/80 to-white px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <section className="dashboard-card min-w-0 overflow-hidden">
+      <div className="flex flex-col gap-3 px-5 pt-5 pb-2 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:pt-6">
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
             <ExclamationTriangleIcon className="h-5 w-5" />
           </span>
           <div>
-            <h2 className="text-lg font-semibold text-gray-800">
-              นักศึกษาที่ควรติดตาม
+            <h2 className="dashboard-section-title">
+              {tr("นักศึกษาที่ควรติดตาม")}
             </h2>
             <p className="mt-1 text-sm text-gray-500">
-              อัตราการเข้าเรียนต่ำกว่า 60% ควรตรวจสอบและให้คำแนะนำ
+              {tr("อัตราการเข้าเรียนต่ำกว่า 60% ควรตรวจสอบและให้คำแนะนำ")}
             </p>
           </div>
         </div>
         <span className="w-fit rounded-full border border-amber-200 bg-white px-3 py-1.5 text-xs font-semibold text-amber-700">
-          {data.length.toLocaleString("th-TH")} คน
+          {data.length.toLocaleString(getLocale())} {tr("คน")}
         </span>
       </div>
       {data.length === 0 ? (
@@ -543,32 +634,37 @@ function RiskTable({ data }: { data: DashboardOverview["riskStudents"] }) {
             <ShieldCheckIcon className="h-6 w-6" />
           </span>
           <p className="text-sm font-medium text-gray-700">
-            นักศึกษาทุกคนอยู่ในเกณฑ์ปกติ
+            {tr("นักศึกษาทุกคนอยู่ในเกณฑ์ปกติ")}
           </p>
           <p className="mt-1 text-xs text-gray-500">
-            ยังไม่มีรายชื่อที่ต้องติดตามในปีการศึกษานี้
+            {tr("ยังไม่มีรายชื่อที่ต้องติดตามในปีการศึกษานี้")}
           </p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[620px] text-sm">
-            <thead className="bg-gray-50 text-gray-600">
+            <thead className="bg-slate-50/80 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
               <tr>
                 <th className="px-6 py-3 text-left font-medium">
-                  รหัสนักศึกษา
+                  {tr("รหัสนักศึกษา")}
                 </th>
                 <th className="px-6 py-3 text-left font-medium">
-                  ชื่อ-นามสกุล
+                  {tr("ชื่อ-นามสกุล")}
                 </th>
-                <th className="px-6 py-3 text-center font-medium">เข้าเรียน</th>
                 <th className="px-6 py-3 text-center font-medium">
-                  อัตราการเข้าเรียน
+                  {tr("เข้าเรียน")}
+                </th>
+                <th className="px-6 py-3 text-center font-medium">
+                  {tr("อัตราการเข้าเรียน")}
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {data.map((student) => (
-                <tr key={student.studentId} className="hover:bg-gray-50">
+                <tr
+                  key={student.studentId}
+                  className="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
+                >
                   <td className="px-6 py-4 text-gray-600">
                     {student.studentId}
                   </td>
@@ -602,24 +698,28 @@ function RiskTable({ data }: { data: DashboardOverview["riskStudents"] }) {
 }
 
 function SmallEmpty({ text }: { text: string }) {
+  const { tr } = useLanguage();
+
   return (
     <div className="flex min-h-48 flex-col items-center justify-center p-6 text-center text-gray-400">
       <ChartBarIcon className="mb-3 h-9 w-9" />
-      <p className="text-sm">{text}</p>
+      <p className="text-sm">{tr(text)}</p>
     </div>
   );
 }
 function Legend({ color, label }: { color: string; label: string }) {
+  const { tr } = useLanguage();
+
   return (
     <span className="flex items-center gap-1.5">
       <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
-      {label}
+      {tr(label)}
     </span>
   );
 }
 function formatMonth(value: string) {
   const [year, month] = value.split("-").map(Number);
-  return new Intl.DateTimeFormat("th-TH", {
+  return new Intl.DateTimeFormat(getLocale(), {
     month: "short",
     year: "numeric",
   }).format(new Date(year, month - 1, 1));
@@ -628,7 +728,7 @@ function formatMonth(value: string) {
 function formatShortDate(value: string) {
   const date = new Date(`${value}T00:00:00+07:00`);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("th-TH", {
+  return new Intl.DateTimeFormat(getLocale(), {
     day: "numeric",
     month: "short",
   }).format(date);
