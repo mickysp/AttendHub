@@ -435,7 +435,7 @@
   "ไม่พบสิทธิ์เข้าใช้งานที่รองรับ กรุณาติดต่อผู้ดูแลระบบ": "No supported access role found. Please contact an administrator",
   "ระบบใช้เวลาตอบกลับนานเกินไป ยังยืนยันชื่อผู้ใช้และรหัสผ่านไม่ได้ กรุณาลองอีกครั้ง": "The server took too long to respond. Your credentials have not been verified. Please try again",
   "เข้าสู่ระบบ Attendance": "Sign in to AttendHub",
-  "จดจำฉันไว้ในระบบ": "Keep me signed in",
+  "จดจำฉันไว้ในระบบ": "Keep me",
   "กำลังตรวจสอบบัญชี...": "Verifying account...",
   "กำลังเปิดหน้าระบบ...": "Opening your workspace...",
   "เข้าสู่ระบบ": "Sign in",

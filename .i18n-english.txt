@@ -434,7 +434,7 @@ Unable to sign in. Please try again
 No supported access role found. Please contact an administrator
 The server took too long to respond. Your credentials have not been verified. Please try again
 Sign in to AttendHub
-Keep me signed in
+Keep me
 Verifying account...
 Opening your workspace...
 Sign in

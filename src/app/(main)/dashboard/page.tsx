@@ -131,14 +131,11 @@ export default function DashboardPage() {
       <div className="mx-auto flex min-h-full w-full max-w-[1600px] flex-col gap-5 p-4 sm:gap-6 sm:p-6 lg:p-8">
         <header className="dashboard-hero flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
           <div className="relative z-[1]">
-            <span className="mb-2 inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-blue-700">
-              {tr("ภาพรวมประจำปีการศึกษา")}
-            </span>
             <h1 className="text-[28px] font-semibold tracking-[-0.03em] text-slate-900 sm:text-[32px] dark:text-white">
               {tr("แดชบอร์ด")}
             </h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              {tr("ภาพรวมการเข้าเรียนและนักศึกษาที่ควรติดตาม")}
+              {tr("ภาพรวมการเข้าเรียน")}
             </p>
           </div>
 

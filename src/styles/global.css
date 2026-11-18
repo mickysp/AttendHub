@@ -222,20 +222,6 @@ html.dark .app-field {
   box-shadow: 0 18px 50px rgb(15 23 42 / 4%);
 }
 
-.dashboard-hero::after {
-  content: "";
-  position: absolute;
-  top: -5rem;
-  right: 7%;
-  width: 15rem;
-  height: 15rem;
-  border: 1px solid rgb(59 130 246 / 9%);
-  border-radius: 999px;
-  box-shadow:
-    0 0 0 2.5rem rgb(59 130 246 / 3%),
-    0 0 0 5rem rgb(59 130 246 / 2%);
-}
-
 .dashboard-card {
   border: none;
   border-radius: 1.25rem;
