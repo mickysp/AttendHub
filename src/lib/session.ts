@@ -19,7 +19,7 @@ export async function verifySession(token: string | undefined) {
   }
   if (typeof payload.userId !== "string" || !ObjectId.isValid(payload.userId))
     return invalid("session_expired");
-  // Database failures must not be reported as revoked sessions.
+  
   const user = await (
     await clientPromise
   )

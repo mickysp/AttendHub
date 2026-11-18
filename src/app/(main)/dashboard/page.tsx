@@ -131,8 +131,7 @@ export default function DashboardPage() {
       <div className="mx-auto flex min-h-full w-full max-w-[1600px] flex-col gap-5 p-4 sm:gap-6 sm:p-6 lg:p-8">
         <header className="dashboard-hero flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
           <div className="relative z-[1]">
-            <span className="mb-2 inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-blue-700 dark:text-blue-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+            <span className="mb-2 inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-blue-700">
               {tr("ภาพรวมประจำปีการศึกษา")}
             </span>
             <h1 className="text-[28px] font-semibold tracking-[-0.03em] text-slate-900 sm:text-[32px] dark:text-white">
@@ -142,26 +141,22 @@ export default function DashboardPage() {
               {tr("ภาพรวมการเข้าเรียนและนักศึกษาที่ควรติดตาม")}
             </p>
           </div>
-          <div className="relative z-[1] flex w-full items-center gap-3 rounded-2xl border border-white/80 bg-white/80 p-2 shadow-sm backdrop-blur sm:w-auto dark:border-slate-700 dark:bg-slate-800/80">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-              <CalendarDaysIcon className="h-5 w-5" />
+
+          <div className="min-w-0 flex-1 sm:w-40 sm:flex-none">
+            <span className="mb-0.5 block px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              {tr("ปีการศึกษา")}
             </span>
-            <div className="min-w-0 flex-1 sm:w-40 sm:flex-none">
-              <span className="mb-0.5 block px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                {tr("ปีการศึกษา")}
-              </span>
-              <AttendanceDropdown
-                value={String(selectedYear)}
-                options={years.map((year) => ({
-                  value: String(year),
-                  label: String(year),
-                }))}
-                placeholder={tr("เลือกปี")}
-                ariaLabel={tr("เลือกปีการศึกษา")}
-                allowEmpty={false}
-                onChange={(value) => value && setSelectedYear(Number(value))}
-              />
-            </div>
+            <AttendanceDropdown
+              value={String(selectedYear)}
+              options={years.map((year) => ({
+                value: String(year),
+                label: String(year),
+              }))}
+              placeholder={tr("เลือกปี")}
+              ariaLabel={tr("เลือกปีการศึกษา")}
+              allowEmpty={false}
+              onChange={(value) => value && setSelectedYear(Number(value))}
+            />
           </div>
         </header>
 

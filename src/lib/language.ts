@@ -65,7 +65,7 @@ function getSnapshot(): Language {
     const stored = window.localStorage.getItem(storageKey);
     if (stored === "th" || stored === "en") currentLanguage = stored;
   } catch {
-    // Keep language switching available when browser storage is disabled.
+    //
   }
   return currentLanguage;
 }

@@ -21,7 +21,6 @@ export function notificationHref(
       typeof log.target === "string" && log.target.includes("รายการ");
     if (log.action === "create" && batchTarget) return "/classes";
 
-    // Legacy logs only contain a name. Resolve it only when it is unambiguous.
     const matches = classes.filter((item) =>
       log.targetId
         ? String(item._id) === log.targetId
@@ -31,7 +30,6 @@ export function notificationHref(
     return /^[a-f\d]{24}$/i.test(id) ? `/classes/form/${id}` : "/classes";
   }
   if (log.category === "accounts") {
-    // Older teacher activities share the accounts category with administrators.
     const legacyTeacherActivity =
       !log.targetType &&
       typeof log.message === "string" &&

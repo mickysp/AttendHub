@@ -9,8 +9,6 @@ type StreamOptions = {
   lifetimeMs?: number;
 };
 
-// Each connection has a bounded lifetime, including on serverless hosts.
-// The client reconnects and reloads its snapshot to recover any missed events.
 export function notificationStream({
   changes,
   signal,
@@ -37,7 +35,7 @@ export function notificationStream({
         try {
           controller.close();
         } catch {
-          /* Already cancelled by the client. */
+          //
         }
       };
       const send = (frame: string) => {
@@ -72,7 +70,7 @@ export function notificationStream({
             );
           } while (pending && !closed);
         } catch {
-          // A temporary database error should reconnect, not log the user out.
+          //
           stop();
         } finally {
           checking = false;

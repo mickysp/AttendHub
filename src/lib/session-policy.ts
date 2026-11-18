@@ -28,7 +28,7 @@ export function sessionInvalidReason(
   if (!user) return "account_deleted";
   if (user.disabled) return "account_disabled";
   if (payload.role !== user.role) return "role_changed";
-  // Legacy tokens have version zero, until the first security change.
+
   if ((payload.sessionVersion ?? 0) !== (user.sessionVersion ?? 0)) {
     return isSessionReason(user.sessionRevokedReason)
       ? user.sessionRevokedReason
