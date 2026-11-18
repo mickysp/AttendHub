@@ -1,3 +1,4 @@
+import { translate as tr } from "@/lib/language";
 import Swal from "sweetalert2";
 import type { SweetAlertOptions } from "sweetalert2";
 
@@ -31,19 +32,19 @@ const baseSwalOptions: SweetAlertOptions = {
 const getDefaultDescription = (variant: ConfirmVariant) => {
   switch (variant) {
     case "delete":
-      return "การลบข้อมูลนี้ไม่สามารถกู้คืนได้";
+      return tr("การลบข้อมูลนี้ไม่สามารถกู้คืนได้");
 
     case "warning":
-      return "การดำเนินการนี้อาจมีผลกระทบกับข้อมูล";
+      return tr("การดำเนินการนี้อาจมีผลกระทบกับข้อมูล");
 
     case "edit":
-      return "คุณต้องการยกเลิกการแก้ไขข้อมูลใช่หรือไม่";
+      return tr("คุณต้องการยกเลิกการแก้ไขข้อมูลใช่หรือไม่");
 
     case "withdraw":
-      return "คุณต้องการถอนรายวิชานี้ใช่หรือไม่";
+      return tr("คุณต้องการถอนรายวิชานี้ใช่หรือไม่");
 
     default:
-      return "คุณต้องการบันทึกข้อมูลใช่หรือไม่";
+      return tr("คุณต้องการบันทึกข้อมูลใช่หรือไม่");
   }
 };
 
@@ -182,50 +183,159 @@ const getStatusIconHtml = (status: "success" | "error") => {
   `;
 };
 
+const normalizeTeacherName = (value: string) => {
+  return value
+    .toLowerCase()
+    .replace(
+      /(อ\.?|อาจารย์|ดร\.?|ผศ\.?|รศ\.?|ศ\.?|นาย|นางสาว|นาง|น\.ส\.?|น\.ส|นางสาว|น.ส\.?)/g,
+      "",
+    )
+    .replace(/[^\p{L}\p{N}]+/gu, "")
+    .trim();
+};
+
 export const appSwal = {
   nameForm({
     title,
     initialValue = "",
     onSave,
+    onSaveMany,
+    validateName,
   }: {
     title: string;
     initialValue?: string;
     onSave: (name: string) => Promise<void>;
+    onSaveMany?: (names: string[]) => Promise<void>;
+    validateName?: (
+      name: string,
+    ) => Promise<string | undefined> | string | undefined;
   }) {
     return Swal.fire({
       ...baseSwalOptions,
-      titleText: title,
-      text: "กรอกชื่อ-นามสกุลอาจารย์ให้ครบถ้วนก่อนบันทึก",
+      titleText: tr(title),
+      text: onSaveMany
+        ? tr("กรอกชื่อ-นามสกุล และกดเพิ่มอาจารย์อีกคนเพื่อบันทึกหลายคนพร้อมกัน")
+        : tr("กรอกชื่อ-นามสกุลอาจารย์ให้ครบถ้วนก่อนบันทึก"),
       iconHtml:
         '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m3 9 9-5 9 5-9 5-9-5Zm3 2v6c3 3 9 3 12 0v-6M21 9v7" /></svg>',
       input: "text",
-      inputLabel: "ชื่อ-นามสกุลอาจารย์",
-      inputPlaceholder: "กรอกชื่อ-นามสกุลอาจารย์",
+      inputLabel: tr("ชื่อ-นามสกุลอาจารย์"),
+      inputPlaceholder: tr("กรอกชื่อ-นามสกุลอาจารย์"),
       inputValue: initialValue,
       inputAttributes: { autocomplete: "name" },
       showCloseButton: false,
       showCancelButton: true,
-      cancelButtonText: "ยกเลิก",
-      confirmButtonText: "บันทึก",
+      cancelButtonText: tr("ยกเลิก"),
+      confirmButtonText: tr("บันทึก"),
       reverseButtons: true,
       showLoaderOnConfirm: true,
+      didOpen: () => {
+        if (!onSaveMany) return;
+        const input = Swal.getInput();
+        if (!input) return;
+        const container = document.createElement("div");
+        container.className = "app-swal-teacher-batch";
+        const rows = document.createElement("div");
+        rows.className = "app-swal-teacher-rows";
+        const add = document.createElement("button");
+        add.type = "button";
+        add.className = "app-swal-add-teacher";
+        add.textContent = tr("+ เพิ่มอาจารย์อีกคน");
+        let nextId = 1;
+        add.onclick = () => {
+          if (Swal.isLoading()) return;
+          Swal.resetValidationMessage();
+          const row = document.createElement("div");
+          row.className = "app-swal-teacher-row";
+          const label = document.createElement("label");
+          label.className = "app-swal-input-label";
+          label.textContent = tr("ชื่อ-นามสกุลอาจารย์");
+          const field = document.createElement("input");
+          field.id = `app-swal-teacher-${nextId++}`;
+          field.className = "swal2-input app-swal-input";
+          field.placeholder = tr("กรอกชื่อ-นามสกุลอาจารย์");
+          field.autocomplete = "name";
+          field.dataset.teacherName = "true";
+          label.htmlFor = field.id;
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "app-swal-remove-teacher";
+          remove.textContent = tr("ลบ");
+          remove.setAttribute("aria-label", tr("ลบช่องอาจารย์นี้"));
+          remove.onclick = () => {
+            if (Swal.isLoading()) return;
+            row.remove();
+            Swal.resetValidationMessage();
+            add.focus();
+          };
+          row.append(label, field, remove);
+          rows.append(row);
+          field.focus();
+        };
+        container.append(rows, add);
+        input.after(container);
+      },
 
-      inputValidator: (value) =>
-        !value.trim() ? "กรุณากรอกชื่อ-นามสกุลอาจารย์" : undefined,
+      inputValidator: async (value) => {
+        const trimmed = value.trim();
+        if (!trimmed) return tr("กรุณากรอกชื่อ-นามสกุลอาจารย์");
+        if (validateName) {
+          const result = await validateName(trimmed);
+          if (result) return tr(result);
+        }
+        return undefined;
+      },
 
       preConfirm: async (value: string) => {
+        const controls = Swal.getPopup()?.querySelectorAll<
+          HTMLInputElement | HTMLButtonElement
+        >(".app-swal-teacher-batch input, .app-swal-teacher-batch button");
         try {
-          await onSave(value.trim());
+          if (onSaveMany) {
+            const fields = Array.from(
+              Swal.getPopup()?.querySelectorAll<HTMLInputElement>(
+                "[data-teacher-name]",
+              ) ?? [],
+            );
+            const names = [
+              value.trim(),
+              ...fields.map((field) => field.value.trim()),
+            ];
+            if (names.some((name) => !name)) {
+              Swal.showValidationMessage(
+                tr("กรุณากรอกชื่อ-นามสกุลอาจารย์ให้ครบทุกคน"),
+              );
+              return false;
+            }
+            if (
+              new Set(names.map(normalizeTeacherName)).size !== names.length
+            ) {
+              Swal.showValidationMessage(
+                tr("มีชื่ออาจารย์ซ้ำในรายการที่กำลังเพิ่ม"),
+              );
+              return false;
+            }
+            controls?.forEach((control) => {
+              control.disabled = true;
+            });
+            await onSaveMany(names);
+          } else {
+            await onSave(value.trim());
+          }
           return true;
         } catch (error) {
-          Swal.showValidationMessage("บันทึกไม่สำเร็จ");
+          Swal.showValidationMessage(tr("บันทึกไม่สำเร็จ"));
           const message = Swal.getValidationMessage();
           if (message)
             message.textContent =
               error instanceof Error
-                ? error.message
-                : "บันทึกไม่สำเร็จ กรุณาลองอีกครั้ง";
+                ? tr(error.message)
+                : tr("บันทึกไม่สำเร็จ กรุณาลองอีกครั้ง");
           return false;
+        } finally {
+          controls?.forEach((control) => {
+            control.disabled = false;
+          });
         }
       },
       customClass: {
@@ -255,12 +365,12 @@ export const appSwal = {
   }) {
     return Swal.fire({
       ...baseSwalOptions,
-      titleText: title,
-      text: text ?? description ?? getDefaultDescription(variant),
+      titleText: tr(title),
+      text: tr(text ?? description ?? getDefaultDescription(variant)),
       html,
       showCancelButton: true,
-      cancelButtonText: "ยกเลิก",
-      confirmButtonText: "ยืนยัน",
+      cancelButtonText: tr("ยกเลิก"),
+      confirmButtonText: tr("ยืนยัน"),
       reverseButtons: true,
       iconHtml: getIconHtml(variant),
       customClass: {
@@ -288,10 +398,10 @@ export const appSwal = {
       ...baseSwalOptions,
       showCloseButton: false,
       iconHtml: getStatusIconHtml("success"),
-      title,
-      text,
+      titleText: tr(title),
+      text: tr(text),
       html,
-      confirmButtonText: "ตกลง",
+      confirmButtonText: tr("ตกลง"),
       customClass: {
         popup: "app-swal-popup app-swal-popup-success",
         title: "app-swal-title app-swal-title-success",
@@ -307,9 +417,9 @@ export const appSwal = {
       ...baseSwalOptions,
       showCloseButton: false,
       iconHtml: getStatusIconHtml("error"),
-      title: "เกิดข้อผิดพลาด",
-      html: text,
-      confirmButtonText: "ตกลง",
+      title: tr("เกิดข้อผิดพลาด"),
+      text: tr(text),
+      confirmButtonText: tr("ตกลง"),
       customClass: {
         popup: "app-swal-popup app-swal-popup-error",
         title: "app-swal-title",
@@ -326,8 +436,8 @@ export const appSwal = {
     html,
     variant = "warning",
     showCancelButton = false,
-    confirmButtonText = "ตกลง",
-    cancelButtonText = "ยกเลิก",
+    confirmButtonText = tr("ตกลง"),
+    cancelButtonText = tr("ยกเลิก"),
   }: {
     title: string;
     text?: string;
@@ -339,8 +449,8 @@ export const appSwal = {
   }) {
     return Swal.fire({
       ...baseSwalOptions,
-      title,
-      text,
+      titleText: tr(title),
+      text: tr(text),
       html,
       iconHtml: getIconHtml(variant),
       showCancelButton,

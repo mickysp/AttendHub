@@ -1,4 +1,6 @@
 "use client";
+import { useLanguage, getLocale } from "@/lib/language";
+
 
 import { attendanceApi } from "@/services/api/attendance";
 import Image from "next/image";
@@ -19,6 +21,8 @@ type Props = {
 };
 
 export default function AttendanceTable({ data, classId }: Props) {
+  const { tr } = useLanguage();
+
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -36,11 +40,12 @@ export default function AttendanceTable({ data, classId }: Props) {
     useState<StudentAttendance | null>(null);
 
   const [openModal, setOpenModal] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const formatThaiDate = (date?: string | null) => {
     if (!date) return "-";
 
-    return new Date(date).toLocaleDateString("th-TH", {
+    return new Date(date).toLocaleDateString(getLocale(), {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -50,7 +55,7 @@ export default function AttendanceTable({ data, classId }: Props) {
   const formatLogDate = (date?: string) => {
     if (!date) return "-";
 
-    return new Date(date).toLocaleDateString("th-TH", {
+    return new Date(date).toLocaleDateString(getLocale(), {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -116,11 +121,9 @@ export default function AttendanceTable({ data, classId }: Props) {
 
   if (data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+      <div className="flex min-h-[240px] flex-col items-center justify-center py-6 text-center">
         <EmptyStateIcon />
-        <p className="whitespace-nowrap text-sm text-gray-500">
-          ไม่พบข้อมูลที่ค้นหา กรุณาลองใหม่อีกครั้ง
-        </p>
+        <p className="whitespace-nowrap text-sm text-gray-500">{tr("ไม่พบข้อมูลที่ค้นหา กรุณาลองใหม่อีกครั้ง")}</p>
       </div>
     );
   }
@@ -138,33 +141,15 @@ export default function AttendanceTable({ data, classId }: Props) {
           <table className="app-data-table w-max min-w-full text-base table-fixed">
             <thead className="sticky top-0 z-50 bg-gray-50 text-gray-600">
               <tr>
-                <th className="px-4 py-3 text-left font-semibold w-[150px]">
-                  รหัสนักศึกษา
-                </th>
-                <th className="px-4 py-3 text-left font-semibold w-[156px]">
-                  ชื่อ-นามสกุล
-                </th>
-                <th className="px-4 py-3 text-center font-semibold w-[170px]">
-                  วันที่เช็คชื่อ
-                </th>
-                <th className="px-4 py-3 text-center font-semibold w-[130px]">
-                  ขาด
-                </th>
-                <th className="px-4 py-3 text-center font-semibold w-[130px]">
-                  มาสาย
-                </th>
-                <th className="px-4 py-3 text-center font-semibold w-[150px]">
-                  เข้าเรียน
-                </th>
-                <th className="px-4 py-3 text-center font-semibold w-[150px]">
-                  คะแนน
-                </th>
-                <th className="px-4 py-3 text-left font-semibold w-[130px] sticky top-0 right-[200px] z-[60] bg-gray-50 border-l border-gray-200 shadow-[-6px_0_14px_rgba(0,0,0,0.08)]">
-                  สถานะ
-                </th>
-                <th className="px-4 py-3 text-left font-semibold w-[200px] sticky top-0 right-0 z-[60] bg-gray-50">
-                  จัดการ
-                </th>
+                <th className="px-4 py-3 text-left font-semibold w-[150px]">{tr("รหัสนักศึกษา")}</th>
+                <th className="px-4 py-3 text-left font-semibold w-[156px]">{tr("ชื่อ-นามสกุล")}</th>
+                <th className="px-4 py-3 text-center font-semibold w-[170px]">{tr("วันที่เช็คชื่อ")}</th>
+                <th className="px-4 py-3 text-center font-semibold w-[130px]">{tr("ขาด")}</th>
+                <th className="px-4 py-3 text-center font-semibold w-[130px]">{tr("มาสาย")}</th>
+                <th className="px-4 py-3 text-center font-semibold w-[150px]">{tr("เข้าเรียน")}</th>
+                <th className="px-4 py-3 text-center font-semibold w-[150px]">{tr("คะแนน")}</th>
+                <th className="px-4 py-3 text-left font-semibold w-[130px] sticky top-0 right-[200px] z-[60] bg-gray-50 border-l border-gray-200 shadow-[-6px_0_14px_rgba(0,0,0,0.08)]">{tr("สถานะ")}</th>
+                <th className="px-4 py-3 text-left font-semibold w-[200px] sticky top-0 right-0 z-[60] bg-gray-50">{tr("จัดการ")}</th>
               </tr>
             </thead>
 
@@ -189,31 +174,25 @@ export default function AttendanceTable({ data, classId }: Props) {
                           </span>
                         ) : (
                           <div className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1">
-                            <span className="text-xs font-medium text-gray-400">
-                              ไม่มีข้อมูล
-                            </span>
+                            <span className="text-xs font-medium text-gray-400">{tr("ไม่มีข้อมูล")}</span>
                           </div>
                         )}
                       </div>
                     </td>
 
                     <td className="px-4 py-3.5 text-sm text-center">
-                      {s.absentDays} ครั้ง
-                    </td>
+                      {s.absentDays}{" "}{tr("ครั้ง")}</td>
 
                     <td className="px-4 py-3.5 text-sm text-center">
                       <div className="flex items-center justify-center">
                         {s.lateDays > 0 ? (
                           <div className="flex items-baseline gap-1">
                             <span className="text-sm font-medium">
-                              {s.lateDays} ครั้ง
-                            </span>
+                              {s.lateDays}{" "}{tr("ครั้ง")}</span>
                           </div>
                         ) : (
                           <div className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1">
-                            <span className="text-xs font-medium text-gray-400">
-                              ไม่มีข้อมูล
-                            </span>
+                            <span className="text-xs font-medium text-gray-400">{tr("ไม่มีข้อมูล")}</span>
                           </div>
                         )}
                       </div>
@@ -256,7 +235,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                               />
 
                               <span className="text-xs font-medium tracking-tight">
-                                {currentStatus.text}
+                                {tr(currentStatus.text)}
                               </span>
                             </div>
                           );
@@ -267,7 +246,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                     <td className="px-4 py-3.5 text-center sticky right-0 z-20 bg-white">
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          title="ดูรายละเอียด"
+                          title={tr("ดูรายละเอียด")}
                           onClick={async () => {
                             try {
                               setLoadingLogs(true);
@@ -311,9 +290,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                           className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 p-2 hover:bg-gray-50 transition cursor-pointer"
                         >
                           <EyeIcon className="w-4 h-4 text-gray-500" />
-                          <span className="text-xs font-medium text-gray-700">
-                            รายละเอียด
-                          </span>
+                          <span className="text-xs font-medium text-gray-700">{tr("รายละเอียด")}</span>
                         </button>
                       </div>
                     </td>
@@ -328,7 +305,7 @@ export default function AttendanceTable({ data, classId }: Props) {
       {data.length > 0 && (
         <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
           <div className="flex items-center gap-2">
-            <span>แสดง</span>
+            <span>{tr("แสดง")}</span>
 
             <div ref={pageSizeRef} className="relative">
               <button
@@ -358,7 +335,7 @@ export default function AttendanceTable({ data, classId }: Props) {
               )}
             </div>
 
-            <span>จากทั้งหมด {data.length} รายการ</span>
+            <span>{tr("จากทั้งหมด")}{" "}{data.length}{" "}{tr("รายการ")}</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -366,9 +343,7 @@ export default function AttendanceTable({ data, classId }: Props) {
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
               disabled={page === 1}
               className="px-3 py-2 text-[13px] rounded-md border border-gray-200 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
-            >
-              ก่อนหน้า
-            </button>
+            >{tr("ก่อนหน้า")}</button>
 
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .slice(Math.max(0, page - 2), page + 1)
@@ -390,9 +365,7 @@ export default function AttendanceTable({ data, classId }: Props) {
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               disabled={page === totalPages}
               className="px-4 py-2 text-[13px] rounded-md border border-gray-200 hover:bg-gray-100 disabled:opacity-40"
-            >
-              ถัดไป
-            </button>
+            >{tr("ถัดไป")}</button>
           </div>
         </div>
       )}
@@ -400,11 +373,29 @@ export default function AttendanceTable({ data, classId }: Props) {
       {openModal && selectedStudent && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
-          onClick={() => setOpenModal(false)}
+          onClick={(event) => {
+            if (event.target !== event.currentTarget) return;
+
+            const dialog = dialogRef.current;
+            if (!dialog) return;
+
+            dialog.classList.remove("app-dialog-attention");
+            void dialog.offsetWidth;
+            dialog.classList.add("app-dialog-attention");
+          }}
         >
           <div
+            ref={dialogRef}
             className="w-full max-w-3xl bg-white rounded-2xl shadow-sm max-h-[85vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
+            onAnimationEnd={(event) => {
+              if (
+                event.target === event.currentTarget &&
+                event.animationName === "app-dialog-shake"
+              ) {
+                event.currentTarget.classList.remove("app-dialog-attention");
+              }
+            }}
           >
             <div className="flex items-center gap-3 border-b border-gray-100 p-6 pb-4">
               <div className="p-2 rounded-lg bg-blue-50">
@@ -412,9 +403,7 @@ export default function AttendanceTable({ data, classId }: Props) {
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">
-                  รายละเอียดการเข้าเรียน
-                </h2>
+                <h2 className="text-lg font-semibold text-gray-800">{tr("รายละเอียดการเข้าเรียน")}</h2>
 
                 <p className="text-sm text-gray-400 mt-0.5">
                   {selectedStudent.name}
@@ -425,7 +414,7 @@ export default function AttendanceTable({ data, classId }: Props) {
             <div className="flex-1 overflow-y-auto px-6 py-4">
               <div className="grid grid-cols-3 gap-4 text-sm mb-6">
                 <div>
-                  <p className="text-gray-500">รหัสนักศึกษา</p>
+                  <p className="text-gray-500">{tr("รหัสนักศึกษา")}</p>
 
                   <p className="font-medium text-gray-800">
                     {selectedStudent.studentId}
@@ -433,7 +422,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                 </div>
 
                 <div>
-                  <p className="text-gray-500">ชื่อ-นามสกุล</p>
+                  <p className="text-gray-500">{tr("ชื่อ-นามสกุล")}</p>
 
                   <p className="font-medium text-gray-800">
                     {selectedStudent.name}
@@ -441,7 +430,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                 </div>
 
                 <div>
-                  <p className="text-gray-500">อีเมล</p>
+                  <p className="text-gray-500">{tr("อีเมล")}</p>
 
                   <p className="font-medium text-gray-800">
                     {selectedStudent.email || "-"}
@@ -449,7 +438,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                 </div>
 
                 <div>
-                  <p className="text-gray-500">สาขา</p>
+                  <p className="text-gray-500">{tr("สาขา")}</p>
 
                   <p className="font-medium text-gray-800">
                     {selectedStudent.major}
@@ -465,7 +454,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                 </div>
 
                 <div>
-                  <p className="text-gray-500">คะแนนรวม</p>
+                  <p className="text-gray-500">{tr("คะแนนรวม")}</p>
 
                   <p className="font-semibold text-blue-600">
                     {selectedStudent.totalScore}
@@ -476,9 +465,7 @@ export default function AttendanceTable({ data, classId }: Props) {
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="h-8 px-3 rounded-full bg-blue-50 border border-blue-100 flex items-center">
-                    <span className="text-sm font-semibold text-blue-700">
-                      ประวัติการเช็คชื่อ
-                    </span>
+                    <span className="text-sm font-semibold text-blue-700">{tr("ประวัติการเช็คชื่อ")}</span>
                   </div>
 
                   <div className="flex-1 h-px bg-gray-100" />
@@ -490,9 +477,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                       <div className="flex flex-col items-center gap-3">
                         <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
 
-                        <p className="text-sm text-gray-400">
-                          กำลังโหลดข้อมูล...
-                        </p>
+                        <p className="text-sm text-gray-400">{tr("กำลังโหลดข้อมูล...")}</p>
                       </div>
                     </div>
                   )}
@@ -503,13 +488,9 @@ export default function AttendanceTable({ data, classId }: Props) {
                         <PhotoIcon className="w-7 h-7 text-gray-400" />
                       </div>
 
-                      <p className="text-sm text-gray-500 font-medium">
-                        ไม่มีประวัติการเช็คชื่อ
-                      </p>
+                      <p className="text-sm text-gray-500 font-medium">{tr("ไม่มีประวัติการเช็คชื่อ")}</p>
 
-                      <p className="text-xs text-gray-400 mt-1">
-                        ยังไม่มีข้อมูลการเข้าเรียนของนักศึกษาคนนี้
-                      </p>
+                      <p className="text-xs text-gray-400 mt-1">{tr("ยังไม่มีข้อมูลการเข้าเรียนของนักศึกษาคนนี้")}</p>
                     </div>
                   )}
 
@@ -553,15 +534,14 @@ export default function AttendanceTable({ data, classId }: Props) {
                                   <div
                                     className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${statusStyle.badge}`}
                                   >
-                                    {log.status}
+                                    {tr(log.status)}
                                   </div>
 
                                   {typeof log.score === "number" && (
                                     <span
                                       className={`text-sm font-semibold ${statusStyle.score}`}
                                     >
-                                      +{log.score} คะแนน
-                                    </span>
+                                      +{log.score}{" "}{tr("คะแนน")}</span>
                                   )}
                                 </div>
 
@@ -589,9 +569,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                                   rel="noopener noreferrer"
                                   className="mt-4 inline-flex w-fit items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-100"
                                 >
-                                  <MapPinIcon className="h-4 w-4 text-gray-500" />
-                                  ดูตำแหน่งที่เช็คชื่อ
-                                </a>
+                                  <MapPinIcon className="h-4 w-4 text-gray-500" />{tr("ดูตำแหน่งที่เช็คชื่อ")}</a>
                               )}
                             </div>
 
@@ -600,7 +578,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                                 <Image
                                   unoptimized
                                   src={log.photo}
-                                  alt="รูปประกอบการเช็กชื่อ"
+                                  alt={tr("รูปประกอบการเช็คชื่อ")}
                                   width={96}
                                   height={96}
                                   className="h-full min-h-[96px] w-24 rounded-2xl border border-gray-200 object-cover"
@@ -609,9 +587,7 @@ export default function AttendanceTable({ data, classId }: Props) {
                                 <div className="flex h-full min-h-[96px] w-24 flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50">
                                   <PhotoIcon className="h-6 w-6 text-gray-300" />
 
-                                  <span className="mt-1 text-[11px] text-gray-400">
-                                    ไม่มีรูป
-                                  </span>
+                                  <span className="mt-1 text-[11px] text-gray-400">{tr("ไม่มีรูป")}</span>
                                 </div>
                               )}
                             </div>
@@ -627,9 +603,7 @@ export default function AttendanceTable({ data, classId }: Props) {
               <button
                 onClick={() => setOpenModal(false)}
                 className="px-4 py-2 rounded-md border border-gray-300 text-gray-600 text-sm hover:bg-gray-100 cursor-pointer"
-              >
-                ปิด
-              </button>
+              >{tr("ปิด")}</button>
             </div>
           </div>
         </div>

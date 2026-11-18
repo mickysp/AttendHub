@@ -7,11 +7,11 @@ api/
   client.ts       # fetch, query encoding, JSON และ FormData
   auth/           # login, OTP, password, user, profile, avatar, logout
   administrators/ # โหลด/เพิ่มผู้ใช้ เปลี่ยนสิทธิ์ และลบผู้ใช้
-  attendance/     # บันทึกเช็กชื่อ สรุป และประวัติ
-  check-in/       # ตั้งค่าฟอร์มเช็กชื่อ
+  attendance/     # บันทึกเช็คชื่อ สรุป และประวัติ
+  check-in/       # ตั้งค่าฟอร์มเช็คชื่อ
   classes/        # รายวิชา
   majors/         # สาขาวิชา
-  schedule/       # ตารางเวลาเช็กชื่อ
+  schedule/       # ตารางเวลาเช็คชื่อ
   students/       # นักศึกษาและอัปโหลดไฟล์
   teachers/       # อาจารย์
 ```
