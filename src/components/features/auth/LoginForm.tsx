@@ -1,7 +1,6 @@
 "use client";
 import { useLanguage } from "@/lib/language";
 
-
 import { authApi } from "@/services/api/auth";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -33,6 +32,7 @@ export default function LoginForm() {
     setUsername,
     setPassword,
     setRemember,
+    setRole,
     clearPassword,
     loadRememberUser,
     saveRememberUser,
@@ -114,29 +114,39 @@ export default function LoginForm() {
         );
       }
 
-      const role = typeof data.role === "string" ? data.role.toLowerCase() : "";
+      const role = typeof data.role === "string" ? data.role.trim() : "";
+
+      const normalizedRole = role.toLowerCase();
+
       const nextPage =
-        role === "teacher"
+        normalizedRole === "teacher"
           ? "/dashboard"
-          : role === "teaching assistant"
+          : normalizedRole === "teaching assistant"
             ? "/attendance"
-            : "";
+            : normalizedRole === "admin"
+              ? "/admin"
+              : "";
+
       if (!nextPage) {
         throw new Error(
           "ไม่พบสิทธิ์เข้าใช้งานที่รองรับ กรุณาติดต่อผู้ดูแลระบบ",
         );
       }
 
+      setRole(role as "Admin" | "Teacher" | "Teaching Assistant");
+
       if (remember) {
         saveRememberUser();
       } else {
         clearRememberUser();
       }
+
       clearPassword();
       setSlow(false);
       setDestination(nextPage);
       setStatus("redirecting");
       router.replace(nextPage);
+
     } catch (error) {
       if (controller.signal.reason === "unmounted") return;
       setLoginError(
@@ -188,7 +198,9 @@ export default function LoginForm() {
           md:mt-4
         "
       >
-        <h1 className="text-lg font-medium leading-relaxed">{tr("เข้าสู่ระบบ AttendHub")}</h1>
+        <h1 className="text-lg font-medium leading-relaxed">
+          {tr("เข้าสู่ระบบ AttendHub")}
+        </h1>
 
         <div className="w-full">
           <input
@@ -331,16 +343,22 @@ export default function LoginForm() {
           {status === "checking" && (
             <p className="text-sm text-gray-500">
               {slow
-                ? tr("ระบบกำลังตอบกลับ กรุณารอสักครู่ ยังไม่ทราบผลการตรวจสอบบัญชี")
+                ? tr(
+                    "ระบบกำลังตอบกลับ กรุณารอสักครู่ ยังไม่ทราบผลการตรวจสอบบัญชี",
+                  )
                 : tr("กำลังตรวจสอบชื่อผู้ใช้และรหัสผ่าน")}
             </p>
           )}
           {status === "redirecting" && (
-            <p className="text-sm text-blue-600">{tr("เข้าสู่ระบบสำเร็จ กำลังเปิดหน้าระบบ...")}</p>
+            <p className="text-sm text-blue-600">
+              {tr("เข้าสู่ระบบสำเร็จ กำลังเปิดหน้าระบบ...")}
+            </p>
           )}
         </div>
         {status === "redirecting" && slow && (
-          <a href={destination} className="text-sm text-blue-600 underline">{tr("หากหน้ายังไม่เปลี่ยน คลิกเพื่อเปิดหน้าระบบ")}</a>
+          <a href={destination} className="text-sm text-blue-600 underline">
+            {tr("หากหน้ายังไม่เปลี่ยน คลิกเพื่อเปิดหน้าระบบ")}
+          </a>
         )}
         {loginError && (
           <p
@@ -358,9 +376,13 @@ export default function LoginForm() {
             text-zinc-500
             hover:underline
           "
-        >{tr("ลืมรหัสผ่าน?")}</Link>
+        >
+          {tr("ลืมรหัสผ่าน?")}
+        </Link>
 
-        <p className="text-sm leading-relaxed text-zinc-500">{tr("หากยังไม่มีบัญชี กรุณาติดต่ออาจารย์เพื่อเพิ่มผู้ใช้ในระบบ")}</p>
+        <p className="text-sm leading-relaxed text-zinc-500">
+          {tr("หากยังไม่มีบัญชี กรุณาติดต่ออาจารย์เพื่อเพิ่มผู้ใช้ในระบบ")}
+        </p>
       </form>
     </div>
   );
