@@ -23,6 +23,7 @@ import type {
   CheckInConfigFields,
   CheckInFormData,
 } from "@/types/check-in";
+import { appSwal } from "@/lib/swal";
 
 export default function CheckInStudentPage({
   classId,
@@ -177,7 +178,7 @@ export default function CheckInStudentPage({
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
-      showAlert("อุปกรณ์ไม่รองรับการระบุตำแหน่ง", "error");
+      appSwal.locationError("อุปกรณ์ไม่รองรับการระบุตำแหน่ง");
       return;
     }
 
@@ -200,10 +201,7 @@ export default function CheckInStudentPage({
       },
       () => {
         setGettingLocation(false);
-        showAlert(
-          "ไม่สามารถดึงตำแหน่งได้ กรุณาอนุญาตการเข้าถึงตำแหน่ง",
-          "error",
-        );
+        appSwal.locationError();
       },
     );
   };

@@ -470,4 +470,55 @@ export const appSwal = {
       },
     });
   },
+
+  locationError(
+    title = "ไม่สามารถเข้าถึงตำแหน่งได้",
+    description = "กรุณาอนุญาตให้เว็บไซต์เข้าถึงตำแหน่งของคุณ",
+  ) {
+    return Swal.fire({
+      ...baseSwalOptions,
+      showCloseButton: false,
+
+      iconHtml: `
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="80"
+        height="80"
+        fill="none"
+        viewBox="0 0 80 80"
+        stroke="#38bdf8"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <circle
+          cx="40"
+          cy="40"
+          r="36"
+          stroke="#38bdf8"
+          stroke-width="2.8"
+        />
+
+        <path
+          d="M56 35c0 11-16 27-16 27S24 46 24 35a16 16 0 1 1 32 0Z"
+        />
+
+        <circle cx="40" cy="35" r="5" />
+      </svg>
+    `,
+
+      titleText: tr(title),
+      text: tr(description),
+      confirmButtonText: tr("ตกลง"),
+
+      customClass: {
+        popup: "app-swal-popup app-swal-popup-error",
+        title: "app-swal-title",
+        htmlContainer: "app-swal-text",
+        confirmButton: "app-swal-ok-btn",
+        icon: "app-swal-icon",
+      },
+    });
+  },
 };
