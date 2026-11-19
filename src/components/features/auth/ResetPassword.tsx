@@ -60,10 +60,12 @@ export default function ResetPassword({ email, otp, onRestart }: Props) {
           className="mx-auto h-12 w-12 text-blue-600"
           aria-hidden="true"
         />
+        
         <div>
           <h1 className="text-xl font-semibold text-gray-800">{tr("ตั้งรหัสผ่านใหม่สำเร็จ")}</h1>
           <p className="mt-2 text-sm text-gray-500">{tr("คุณสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้แล้ว")}</p>
         </div>
+
         <Link
           href="/login"
           className="form-button flex min-h-11 items-center justify-center text-sm font-medium"
@@ -78,11 +80,13 @@ export default function ResetPassword({ email, otp, onRestart }: Props) {
         <h1 className="text-xl font-semibold text-gray-800">{tr("ตั้งรหัสผ่านใหม่")}</h1>
         <p className="mt-2 text-sm leading-relaxed text-gray-500">{tr("เลือกรหัสผ่านใหม่สำหรับบัญชีของคุณ")}</p>
       </div>
+
       <div>
         <label
           htmlFor="recovery-password"
           className="mb-2 block text-sm font-medium text-gray-700"
         >{tr("รหัสผ่านใหม่")}</label>
+
         <div className="relative">
           <input
             id="recovery-password"
@@ -102,6 +106,7 @@ export default function ResetPassword({ email, otp, onRestart }: Props) {
             style={{ paddingRight: "3rem" }}
             placeholder={tr("อย่างน้อย 8 ตัวอักษร")}
           />
+
           <button
             type="button"
             aria-label={showPassword ? tr("ซ่อนรหัสผ่านใหม่") : tr("แสดงรหัสผ่านใหม่")}
@@ -116,13 +121,16 @@ export default function ResetPassword({ email, otp, onRestart }: Props) {
             )}
           </button>
         </div>
+
         <p id="recovery-password-hint" className="mt-2 text-xs text-gray-500">{tr("ใช้รหัสผ่านอย่างน้อย 8 ตัวอักษร")}</p>
       </div>
+
       <div>
         <label
           htmlFor="recovery-confirm"
           className="mb-2 block text-sm font-medium text-gray-700"
         >{tr("ยืนยันรหัสผ่านใหม่")}</label>
+
         <div className="relative">
           <input
             id="recovery-confirm"
@@ -142,6 +150,7 @@ export default function ResetPassword({ email, otp, onRestart }: Props) {
             style={{ paddingRight: "3rem" }}
             placeholder={tr("กรอกรหัสผ่านใหม่อีกครั้ง")}
           />
+
           <button
             type="button"
             aria-label={
@@ -162,6 +171,7 @@ export default function ResetPassword({ email, otp, onRestart }: Props) {
           <p id="recovery-confirm-error" className="mt-2 text-xs text-red-500">{tr("รหัสผ่านทั้งสองช่องไม่ตรงกัน")}</p>
         )}
       </div>
+
       {error && (
         <div className="space-y-2">
           <p role="alert" className="text-sm text-red-500">
@@ -175,6 +185,7 @@ export default function ResetPassword({ email, otp, onRestart }: Props) {
           >{tr("เริ่มใหม่เพื่อขอรหัส OTP")}</button>
         </div>
       )}
+
       <button
         type="submit"
         disabled={!isValid || loading}

@@ -355,11 +355,13 @@ export default function LoginForm() {
             </p>
           )}
         </div>
+
         {status === "redirecting" && slow && (
           <a href={destination} className="text-sm text-blue-600 underline">
             {tr("หากหน้ายังไม่เปลี่ยน คลิกเพื่อเปิดหน้าระบบ")}
           </a>
         )}
+        
         {loginError && (
           <p
             role="alert"

@@ -51,6 +51,7 @@ export default function ForgotPassword({ initialEmail, onNext }: Props) {
         <h1 className="text-xl font-semibold text-gray-800">{tr("ลืมรหัสผ่าน?")}</h1>
         <p className="mt-2 text-sm leading-relaxed text-gray-500">{tr("กรอกอีเมลที่ใช้ในระบบ เพื่อรับรหัส OTP สำหรับตั้งรหัสผ่านใหม่")}</p>
       </div>
+      
       <div>
         <label
           htmlFor="recovery-email"
@@ -73,6 +74,7 @@ export default function ForgotPassword({ initialEmail, onNext }: Props) {
           className="form-input text-sm"
           placeholder="name@example.com"
         />
+
         {error && (
           <p
             id="recovery-email-error"
@@ -83,6 +85,7 @@ export default function ForgotPassword({ initialEmail, onNext }: Props) {
           </p>
         )}
       </div>
+
       <button
         type="submit"
         disabled={!isValid || loading}

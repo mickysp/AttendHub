@@ -2,71 +2,28 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { currentUser } from "@/lib/admin-auth";
+import type { AttendanceLogDocument, CheckInLog } from "@/types/attendance-log";
+import type { SessionDocument } from "@/types/session";
 
-type ThaiStatus = "มาเรียน" | "มาสาย" | "ลา" | "ขาด" | "ยังไม่เช็คชื่อ";
+const getNowTH = () => new Date();
 
-type CheckInLog = {
-  date: string;
-  time?: Date | string;
-  timeText: string;
-  status: ThaiStatus;
-  score?: number;
-  photo?: string;
-  location?: {
-    lat: number;
-    lng: number;
-  };
-};
+const getDateTH = (date: Date) =>
+  new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Asia/Bangkok",
+  }).format(date);
 
-type AttendanceDoc = {
-  _id?: ObjectId;
-  sessionId?: ObjectId | string;
-  classId: ObjectId | string;
-  studentId: string;
-  status: ThaiStatus;
-  score?: number;
-  academicYear: number;
-  date: string;
-  checkInHour?: string;
-  createdAt?: Date;
-  logs?: CheckInLog[];
-};
-
-type SessionDoc = {
-  _id?: ObjectId;
-  classId: ObjectId | string;
-  academicYear: number;
-  date: string;
-  startTime?: string;
-  endTime?: string;
-  lateAfter?: number;
-  allowCheckIn?: boolean;
-  isOpen?: boolean;
-  className?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-};
-
-const getNowTH = () =>
-  new Date(
-    new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Bangkok",
-    }),
-  );
-
-const getAcademicYear = () => getNowTH().getFullYear() + 543;
+const getAcademicYear = () => Number(getDateTH(new Date()).slice(0, 4)) + 543;
 
 function createSessionDateTime(date: string, time: string) {
   return new Date(`${date}T${time}:00+07:00`);
 }
 
-function isSessionEnded(session: SessionDoc) {
+function isSessionEnded(session: SessionDocument) {
   if (!session.date || !session.endTime) {
     return false;
   }
 
   const now = getNowTH();
-
   const end = createSessionDateTime(session.date, session.endTime);
 
   return now > end;
@@ -75,37 +32,52 @@ function isSessionEnded(session: SessionDoc) {
 export async function GET(req: Request) {
   try {
     const user = await currentUser();
+
     if (!user) {
       return NextResponse.json(
-        { success: false, message: "กรุณาเข้าสู่ระบบ", logs: [] },
+        {
+          success: false,
+          message: "กรุณาเข้าสู่ระบบ",
+          logs: [],
+        },
         { status: 401 },
       );
     }
+
     const { searchParams } = new URL(req.url);
 
     const classId = searchParams.get("classId");
-
     const studentId = searchParams.get("studentId");
 
     if (!classId || !studentId) {
-      return NextResponse.json({
-        success: false,
-        message: "missing params",
-        logs: [],
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "missing params",
+          logs: [],
+        },
+        { status: 400 },
+      );
     }
 
     const client = await clientPromise;
-
     const db = client.db("attendance");
 
-    const attendanceCol = db.collection<AttendanceDoc>("attendance");
+    const attendanceCol = db.collection<AttendanceLogDocument>("attendance");
+    const sessionsCol = db.collection<SessionDocument>("sessions");
+    const yearParam = searchParams.get("year");
+    const academicYear = yearParam ? Number(yearParam) : getAcademicYear();
 
-    const sessionsCol = db.collection<SessionDoc>("sessions");
-
-    const academicYear = searchParams.get("year")
-      ? Number(searchParams.get("year"))
-      : getAcademicYear();
+    if (!Number.isInteger(academicYear) || academicYear <= 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid academic year",
+          logs: [],
+        },
+        { status: 400 },
+      );
+    }
 
     const classConditions: (string | ObjectId)[] = [classId];
 
@@ -118,7 +90,6 @@ export async function GET(req: Request) {
         classId: {
           $in: classConditions,
         },
-
         academicYear,
       })
       .sort({
@@ -132,32 +103,26 @@ export async function GET(req: Request) {
         classId: {
           $in: classConditions,
         },
-
         studentId: {
-          $in: [studentId, studentId.toString()],
+          $in: [studentId],
         },
-
         academicYear,
       })
       .toArray();
 
-    const attendanceMap = new Map<string, AttendanceDoc>(
+    const attendanceMap = new Map<string, AttendanceLogDocument>(
       attendanceRecords.map((record) => [String(record.sessionId), record]),
     );
 
-    const logs: CheckInLog[] = sessions.map((session: SessionDoc) => {
+    const logs: CheckInLog[] = sessions.map((session) => {
       const attendance = attendanceMap.get(String(session._id));
 
       if (attendance) {
         return {
           date: attendance.date,
-
           time: attendance.createdAt,
-
           timeText: attendance.checkInHour || "-",
-
           status: attendance.status,
-
           score: attendance.score || 0,
         };
       }
@@ -166,13 +131,8 @@ export async function GET(req: Request) {
 
       return {
         date: session.date,
-
-        time: undefined,
-
         timeText: "-",
-
         status: ended ? "ขาด" : "ยังไม่เช็คชื่อ",
-
         score: 0,
       };
     });
@@ -185,6 +145,8 @@ export async function GET(req: Request) {
       logs,
     });
   } catch (error) {
+    console.error("Attendance Logs API Error:", error);
+
     return NextResponse.json(
       {
         success: false,

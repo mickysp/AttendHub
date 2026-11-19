@@ -1,14 +1,18 @@
 import type { ObjectId } from "mongodb";
 
 export type AttendanceStatus = "มาเรียน" | "มาสาย" | "ลา" | "ขาด";
+
+export type AttendanceSummaryStatus =
+  | AttendanceStatus
+  | "ยังไม่เช็คชื่อ";
 export interface StudentAttendance {
   studentId: string;
   name: string;
   email: string;
-  attendanceDate?: string | null;
+  attendanceDate: string | null;
   section: string;
   major: string;
-  status: AttendanceStatus;
+  status: AttendanceSummaryStatus;
   score: number;
   checkInTime: string | null;
   totalScore: number;
@@ -19,7 +23,7 @@ export interface StudentAttendance {
 }
 export interface AttendanceDocument {
   _id?: ObjectId;
-  sessionId: ObjectId;
+  sessionId: ObjectId | string;
   classId: ObjectId | string;
   className: string;
   studentId: string;
@@ -34,6 +38,16 @@ export interface AttendanceDocument {
   score: number;
   createdAt: Date;
   updatedAt: Date;
+}
+export interface AttendanceAggregate {
+  _id: string;
+  totalScore: number;
+  days: number;
+  lateDays: number;
+  lastStatus?: AttendanceStatus;
+  lastAttendanceDate?: string;
+  lastCheckInTime?: Date;
+  lastCheckInHour?: string;
 }
 export interface CheckInRequestBody {
   classId: string;
@@ -61,7 +75,6 @@ export interface AttendanceResponse {
     score: number;
   };
 }
-
 export interface AttendanceLog {
   date?: string;
   timeText: string;
@@ -73,12 +86,10 @@ export interface AttendanceLog {
     lng: number;
   };
 }
-
 export interface AttendanceSubject {
   id: string;
   name: string;
 }
-
 export interface AttendanceClassOption {
   _id: string;
   className?: string;

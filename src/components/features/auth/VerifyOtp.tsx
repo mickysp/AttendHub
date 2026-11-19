@@ -72,6 +72,7 @@ export default function VerifyOtp({ email, onNext, onBack }: Props) {
           </span>
         </p>
       </div>
+
       <div>
         <label
           htmlFor="recovery-otp"
@@ -99,6 +100,7 @@ export default function VerifyOtp({ email, onNext, onBack }: Props) {
           className="form-input text-center text-xl tracking-[0.35em]"
           placeholder="000000"
         />
+        
         <p id="recovery-otp-hint" className="mt-2 text-xs text-gray-500">{tr("รหัสมีอายุ 10 นาที กรุณาตรวจสอบในอีเมลขยะด้วย")}</p>
         {error && (
           <p
@@ -110,11 +112,13 @@ export default function VerifyOtp({ email, onNext, onBack }: Props) {
           </p>
         )}
       </div>
+
       {notice && (
         <p role="status" className="text-xs text-blue-600">
           {tr(notice)}
         </p>
       )}
+      
       <button
         type="submit"
         disabled={!isValid || busy}
@@ -122,6 +126,7 @@ export default function VerifyOtp({ email, onNext, onBack }: Props) {
       >
         {loading ? tr("กำลังตรวจสอบ...") : tr("ยืนยันรหัส OTP")}
       </button>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
@@ -129,6 +134,7 @@ export default function VerifyOtp({ email, onNext, onBack }: Props) {
           disabled={busy}
           className="cursor-pointer rounded text-sm text-gray-500 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
         >{tr("เปลี่ยนอีเมล")}</button>
+
         <button
           type="button"
           onClick={() => void resendOtp()}

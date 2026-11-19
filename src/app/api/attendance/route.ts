@@ -2,24 +2,40 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-const getNowTH = () =>
-  new Date(
-    new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Bangkok",
-    }),
-  );
+type AttendanceStatusResult =
+  | {
+      success: true;
+      status: "มาเรียน" | "มาสาย";
+      score: number;
+    }
+  | {
+      success: false;
+      message: string;
+    };
 
-const getAcademicYear = () => {
-  const nowTH = getNowTH();
+const getNowTH = () => new Date();
 
-  return nowTH.getFullYear() + 543;
-};
-
-const getDateTH = (date: Date) => {
-  return new Intl.DateTimeFormat("sv-SE", {
+const getDateTH = (date: Date) =>
+  new Intl.DateTimeFormat("sv-SE", {
     timeZone: "Asia/Bangkok",
   }).format(date);
-};
+
+const getAcademicYear = () => Number(getDateTH(new Date()).slice(0, 4)) + 543;
+
+function isValidDateTime(date: unknown, time: unknown): boolean {
+  if (
+    typeof date !== "string" ||
+    typeof time !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+    !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)
+  ) {
+    return false;
+  }
+
+  const parsed = new Date(`${date}T${time}:00+07:00`);
+
+  return !Number.isNaN(parsed.getTime()) && getDateTH(parsed) === date;
+}
 
 function createSessionDateTime(date: string, time: string) {
   return new Date(`${date}T${time}:00+07:00`);
@@ -30,7 +46,7 @@ function getAttendanceStatus(session: {
   startTime: string;
   endTime: string;
   lateAfter: number;
-}) {
+}): AttendanceStatusResult {
   const now = getNowTH();
 
   const start = createSessionDateTime(session.date, session.startTime);
@@ -38,7 +54,6 @@ function getAttendanceStatus(session: {
   const end = createSessionDateTime(session.date, session.endTime);
 
   const late = new Date(start);
-
   late.setMinutes(late.getMinutes() + session.lateAfter);
 
   if (now < start) {
@@ -72,238 +87,328 @@ function getAttendanceStatus(session: {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    let body: unknown;
 
-    const { classId, sessionId, studentId, name, section, email } = body;
-
-    if (!classId || !sessionId || !studentId) {
-      return NextResponse.json({
-        success: false,
-        message: "missing data",
-      });
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "รูปแบบ JSON ไม่ถูกต้อง",
+        },
+        { status: 400 },
+      );
     }
 
-    if (!ObjectId.isValid(sessionId)) {
-      return NextResponse.json({
-        success: false,
-        message: "sessionId ไม่ถูกต้อง",
-      });
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "รูปแบบข้อมูลไม่ถูกต้อง",
+        },
+        { status: 400 },
+      );
+    }
+
+    const { classId, sessionId, studentId } = body as {
+      classId?: unknown;
+      sessionId?: unknown;
+      studentId?: unknown;
+    };
+
+    if (
+      typeof classId !== "string" ||
+      typeof sessionId !== "string" ||
+      typeof studentId !== "string" ||
+      !classId.trim() ||
+      !sessionId.trim() ||
+      !studentId.trim()
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "กรุณากรอกข้อมูลให้ครบถ้วน",
+        },
+        { status: 400 },
+      );
+    }
+
+    const cleanClassId = classId.trim();
+    const cleanSessionId = sessionId.trim();
+    const cleanStudentId = studentId.trim();
+
+    if (cleanStudentId.length > 30 || cleanClassId.length > 100) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ข้อมูลมีความยาวไม่ถูกต้อง",
+        },
+        { status: 400 },
+      );
+    }
+
+    if (!ObjectId.isValid(cleanSessionId)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "sessionId ไม่ถูกต้อง",
+        },
+        { status: 400 },
+      );
     }
 
     const client = await clientPromise;
-
     const db = client.db("attendance");
 
     const sessionsCol = db.collection("sessions");
-
     const attendanceCol = db.collection("attendance");
-
     const studentsCol = db.collection("students");
-
     const studentClassesCol = db.collection("student_classes");
-
-    const sessionObjectId = new ObjectId(sessionId);
+    const sessionObjectId = new ObjectId(cleanSessionId);
 
     const session = await sessionsCol.findOne({
       _id: sessionObjectId,
     });
 
     if (!session) {
-      return NextResponse.json({
-        success: false,
-        message: "ไม่พบข้อมูล session",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ไม่พบข้อมูล Session",
+        },
+        { status: 404 },
+      );
+    }
+
+    if (!session.classId || String(session.classId) !== cleanClassId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Session นี้ไม่ได้อยู่ในรายวิชาที่ระบุ",
+        },
+        { status: 403 },
+      );
+    }
+
+    if (
+      !isValidDateTime(session.date, session.startTime) ||
+      !isValidDateTime(session.date, session.endTime)
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "วันที่หรือเวลา Session ไม่ถูกต้อง",
+        },
+        { status: 400 },
+      );
     }
 
     const nowTH = getNowTH();
-
     const todayTH = getDateTH(nowTH);
 
-    const sessionDate = new Date(`${session.date}T00:00:00+07:00`);
-
-    const todayDate = new Date(`${todayTH}T00:00:00+07:00`);
-
-    if (todayDate < sessionDate) {
-      return NextResponse.json({
-        success: false,
-        message: "ยังไม่ถึงวันเรียน",
-      });
+    if (todayTH < session.date) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ยังไม่ถึงวันเรียน",
+        },
+        { status: 400 },
+      );
     }
 
-    if (todayDate > sessionDate) {
-      return NextResponse.json({
-        success: false,
-        message: "หมดเวลาเช็คชื่อแล้ว กรุณาใช้ session ล่าสุด",
-      });
+    if (todayTH > session.date) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "หมดเวลาเช็คชื่อแล้ว กรุณาใช้ Session ล่าสุด",
+        },
+        { status: 400 },
+      );
     }
 
-    if (!session.startTime || !session.endTime) {
-      return NextResponse.json({
-        success: false,
-        message: "session ไม่มีเวลาเริ่มหรือเวลาสิ้นสุด",
-      });
+    const startTime = createSessionDateTime(session.date, session.startTime);
+
+    const endTime = createSessionDateTime(session.date, session.endTime);
+
+    if (endTime <= startTime) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "เวลาเลิกเรียนต้องอยู่หลังเวลาเริ่มเรียน",
+        },
+        { status: 400 },
+      );
     }
 
     if (session.allowCheckIn === false) {
-      return NextResponse.json({
-        success: false,
-        message: "อาจารย์ปิดการเช็คชื่อ",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "อาจารย์ปิดการเช็คชื่อ",
+        },
+        { status: 403 },
+      );
     }
 
     if (session.isOpen === false) {
-      return NextResponse.json({
-        success: false,
-        message: "session ยังไม่เปิดใช้งาน",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Session ยังไม่เปิดใช้งาน",
+        },
+        { status: 403 },
+      );
     }
 
     const student = await studentsCol.findOne({
-      studentId,
+      studentId: cleanStudentId,
     });
 
     if (!student) {
-      return NextResponse.json({
-        success: false,
-        message: "ไม่พบนักศึกษาในระบบ",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ไม่พบรหัสนักศึกษาในระบบ",
+        },
+        { status: 404 },
+      );
     }
 
     const studentRelation = await studentClassesCol.findOne({
       $and: [
         {
           $or: [
-            {
-              studentId,
-            },
-
-            {
-              studentId: student._id?.toString(),
-            },
-
-            {
-              studentId: student._id,
-            },
+            { studentId: cleanStudentId },
+            { studentId: student._id.toString() },
+            { studentId: student._id },
           ],
         },
-
         {
           $or: [
-            {
-              classId,
-            },
-
-            {
-              classId: session.classId?.toString(),
-            },
-
-            {
-              classId: session.classId,
-            },
+            { classId: session.classId },
+            { classId: String(session.classId) },
           ],
         },
       ],
     });
 
     if (!studentRelation) {
-      return NextResponse.json({
-        success: false,
-        message: "นักศึกษาไม่ได้อยู่ในรายวิชานี้",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "นักศึกษาไม่ได้ลงทะเบียนในรายวิชานี้",
+        },
+        { status: 403 },
+      );
     }
 
     const academicYear = getAcademicYear();
 
     const exist = await attendanceCol.findOne({
       sessionId: sessionObjectId,
-
-      studentId,
-
-      academicYear,
+      studentId: cleanStudentId,
     });
 
     if (exist) {
-      return NextResponse.json({
-        success: false,
-        message: "เช็คชื่อแล้ว",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "คุณเช็คชื่อใน Session นี้แล้ว",
+        },
+        { status: 409 },
+      );
     }
+
+    const lateAfter =
+      Number.isInteger(session.lateAfter) &&
+      session.lateAfter >= 0 &&
+      session.lateAfter <= 180
+        ? session.lateAfter
+        : 15;
 
     const attendanceResult = getAttendanceStatus({
       date: session.date,
-
       startTime: session.startTime,
-
       endTime: session.endTime,
-
-      lateAfter: session.lateAfter || 15,
+      lateAfter,
     });
 
     if (!attendanceResult.success) {
-      return NextResponse.json({
-        success: false,
-        message: attendanceResult.message,
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          message: attendanceResult.message,
+        },
+        { status: 400 },
+      );
     }
 
     const insertData = {
       sessionId: sessionObjectId,
-
       classId: session.classId,
-
       className: session.className || "",
-
-      studentId,
-
-      name: name || student.fullName || "",
-
-      section: section || student.section || "",
-
-      email: email || student.email || "",
-
+      studentId: cleanStudentId,
+      name: student.fullName || "",
+      section: student.section || "",
+      email: student.email || "",
       academicYear,
-
       date: session.date,
-
       checkInTime: nowTH,
-
-      checkInHour: nowTH.toLocaleTimeString("th-TH"),
-
+      checkInHour: nowTH.toLocaleTimeString("th-TH", {
+        timeZone: "Asia/Bangkok",
+      }),
       status: attendanceResult.status,
-
       score: attendanceResult.score,
-
       createdAt: nowTH,
-
       updatedAt: nowTH,
     };
 
-    await attendanceCol.insertOne(insertData);
+    try {
+      await attendanceCol.insertOne(insertData);
+    } catch (error: unknown) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === 11000
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "คุณเช็คชื่อใน Session นี้แล้ว",
+          },
+          { status: 409 },
+        );
+      }
 
-    return NextResponse.json({
-      success: true,
+      throw error;
+    }
 
-      message: "เช็คชื่อสำเร็จ",
-
-      data: {
-        studentId,
-
-        sessionId,
-
-        sessionDate: session.date,
-
-        checkInTime: nowTH,
-
-        status: attendanceResult.status,
-
-        score: attendanceResult.score,
+    return NextResponse.json(
+      {
+        success: true,
+        message: "เช็คชื่อสำเร็จ",
+        data: {
+          studentId: cleanStudentId,
+          sessionId: cleanSessionId,
+          sessionDate: session.date,
+          checkInTime: nowTH,
+          status: attendanceResult.status,
+          score: attendanceResult.score,
+        },
       },
-    });
+      { status: 201 },
+    );
   } catch (error) {
-    return NextResponse.json({
-      success: false,
+    console.error("Attendance Check-in Error:", error);
 
-      message: error instanceof Error ? error.message : "error",
-    });
+    return NextResponse.json(
+      {
+        success: false,
+        message: "เกิดข้อผิดพลาดในการเช็คชื่อ กรุณาลองใหม่อีกครั้ง",
+      },
+      { status: 500 },
+    );
   }
 }

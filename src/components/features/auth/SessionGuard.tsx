@@ -30,13 +30,14 @@ export default function SessionGuard() {
       if (stopped || exiting || !isSessionReason(value)) return;
       exiting = true;
       setReason(value);
+
       if (broadcast) channel?.postMessage(value);
-      // Revocation is enforced by the server before this popup is shown.
       void fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
         signal: AbortSignal.timeout(2500),
       }).catch(() => {});
+
       redirectTimer = setTimeout(() => {
         window.location.replace(`/login?reason=${encodeURIComponent(value)}`);
       }, 3000);
@@ -51,6 +52,7 @@ export default function SessionGuard() {
       )
         return;
       checking = true;
+
       try {
         const response = await fetch("/api/auth/user", {
           cache: "no-store",
@@ -62,20 +64,24 @@ export default function SessionGuard() {
           endSession(data.reason);
         }
       } catch {
-        // Network/server failures are retried, never treated as a logout.
+        //
       } finally {
         checking = false;
       }
     };
+
     const onInvalid = (event: Event) =>
       endSession((event as CustomEvent).detail);
+
     if (channel) channel.onmessage = (event) => endSession(event.data, false);
     window.addEventListener("session-invalid", onInvalid);
     window.addEventListener("focus", check);
     window.addEventListener("profile-updated", check);
     document.addEventListener("visibilitychange", check);
+
     const interval = setInterval(check, 15000);
     void check();
+
     return () => {
       stopped = true;
       clearInterval(interval);
@@ -90,9 +96,11 @@ export default function SessionGuard() {
 
   useEffect(() => {
     if (!reason) return;
+
     const content = document.getElementById("authenticated-content");
     content?.setAttribute("inert", "");
     document.getElementById("session-dialog")?.focus();
+
     return () => content?.removeAttribute("inert");
   }, [reason]);
 
@@ -114,13 +122,16 @@ export default function SessionGuard() {
             strokeWidth={1.8}
           />
         </div>
+
         <h2 id="session-title" className="app-swal-title">
           {tr(sessionMessages[reason])}
         </h2>
+
         <p
           id="session-description"
           className="app-swal-text app-session-description"
         >{tr("กรุณาเข้าสู่ระบบอีกครั้งเพื่อดำเนินการต่อ")}</p>
+
         <div className="app-session-status">
           <span
             aria-hidden="true"
@@ -128,6 +139,7 @@ export default function SessionGuard() {
           />
           <span>{tr("กำลังออกจากระบบ")}</span>
         </div>
+        
         <div aria-hidden="true" className="app-session-progress">
           <div className="app-session-progress-fill" />
         </div>

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "db:indexes": "tsx scripts/indexes/attendance.index.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -41,6 +42,7 @@
     "eslint-config-next": "16.1.6",
     "prettier": "^3.9.9",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
