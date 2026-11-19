@@ -12,6 +12,8 @@ import {
   CheckCircleIcon,
   ChevronDownIcon,
   AcademicCapIcon,
+  ArrowsPointingOutIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useRef } from "react";
 import { useConfirm } from "@/context/swal";
@@ -42,16 +44,19 @@ export default function CheckInStudentPage({
   const [showSuccess, setShowSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const [errors] = useState<Record<string, string>>({});
   const [loadingClass, setLoadingClass] = useState(true);
-
   const [openPrefix, setOpenPrefix] = useState(false);
   const prefixRef = useRef<HTMLDivElement>(null);
-
   const [classInfo, setClassInfo] = useState<CheckInClassInfo | null>(null);
+  const [emailTouched, setEmailTouched] = useState(false);
 
   const isEmailValid = (email?: string) =>
-    !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+  const emailError =
+    config?.email && emailTouched && form.email && !isEmailValid(form.email);
 
   const isStudentIdValid = (id?: string) => !id || /^\d{9}-\d$/.test(id);
 
@@ -61,8 +66,12 @@ export default function CheckInStudentPage({
     if (config.prefix && !form.prefix) return false;
     if (config.firstname && !form.firstname) return false;
     if (config.lastname && !form.lastname) return false;
-    if (config.email && (!form.email || !isEmailValid(form.email)))
+    if (
+      config.email &&
+      (!form.email?.trim() || !isEmailValid(form.email.trim()))
+    ) {
       return false;
+    }
     if (
       config.studentId &&
       (!form.studentId || !isStudentIdValid(form.studentId))
@@ -364,7 +373,7 @@ export default function CheckInStudentPage({
 
           <section
             aria-labelledby="checkin-instructions-title"
-            className="bg-slate-50/60 px-5 py-5 sm:px-8"
+            className="bg-slate-50/80 px-5 py-5 sm:px-8"
           >
             <h2
               id="checkin-instructions-title"
@@ -641,19 +650,42 @@ export default function CheckInStudentPage({
                   >
                     {tr("อีเมล")}
                   </label>
+
                   <input
                     id="student-email"
                     type="email"
                     autoComplete="email"
                     placeholder="name@example.com"
-                    className="form-input-card w-full text-sm"
-                    onChange={(e) =>
+                    value={form.email || ""}
+                    onChange={(e) => {
                       setForm((prev) => ({
                         ...prev,
                         email: e.target.value,
-                      }))
+                      }));
+
+                      setEmailTouched(true);
+                    }}
+                    onBlur={() => setEmailTouched(true)}
+                    aria-invalid={!!emailError}
+                    aria-describedby={
+                      emailError ? "student-email-error" : undefined
                     }
+                    className={`form-input-card w-full text-sm ${
+                      emailError
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : ""
+                    }`}
                   />
+
+                  {emailError && (
+                    <p
+                      id="student-email-error"
+                      role="alert"
+                      className="mt-1.5 text-xs text-red-500"
+                    >
+                      {tr("รูปแบบอีเมลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง")}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -745,7 +777,7 @@ export default function CheckInStudentPage({
 
               {config?.location && (
                 <div>
-                  <label className="text-sm text-gray-700 mb-1 block">
+                  <label className="text-sm text-gray-700 mb-2 block font-medium">
                     {tr("ตำแหน่งที่ตั้ง")}
                   </label>
 
@@ -759,7 +791,7 @@ export default function CheckInStudentPage({
                     {gettingLocation ? (
                       <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin absolute left-3 top-1/2 -translate-y-1/2" />
                     ) : form.location ? (
-                      <CheckCircleIcon className="w-5 h-5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <CheckCircleIcon className="w-5 h-5 text-green-500 absolute left-3 top-1/2 -translate-y-1/2" />
                     ) : (
                       <MapPinIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     )}
@@ -768,12 +800,51 @@ export default function CheckInStudentPage({
                       {gettingLocation
                         ? tr("กำลังดึงตำแหน่ง...")
                         : form.location
-                          ? `Lat: ${form.location.lat.toFixed(4)}, Lng: ${form.location.lng.toFixed(4)}`
+                          ? tr("ดึงตำแหน่งสำเร็จ กดเพื่ออัปเดตตำแหน่ง")
                           : tr("กดเพื่อดึงตำแหน่งปัจจุบัน")}
                     </span>
                   </button>
 
-                  <p className="text-xs text-gray-500 mt-1">
+                  {form.location && (
+                    <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
+                      <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <MapPinIcon className="h-5 w-5 shrink-0 text-blue-600" />
+
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-slate-800">
+                              {tr("ตำแหน่งปัจจุบันของคุณ")}
+                            </p>
+
+                            <p className="text-xs text-slate-500">
+                              Lat: {form.location.lat.toFixed(6)}, Lng:{" "}
+                              {form.location.lng.toFixed(6)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsMapDialogOpen(true)}
+                          className="flex shrink-0 items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-100 cursor-pointer"
+                        >
+                          <ArrowsPointingOutIcon className="h-4 w-4" />
+                          {tr("ขยายแผนที่")}
+                        </button>
+                      </div>
+
+                      <iframe
+                        title={tr("แผนที่แสดงตำแหน่งปัจจุบัน")}
+                        src={`https://maps.google.com/maps?q=${form.location.lat},${form.location.lng}&z=17&output=embed`}
+                        className="h-56 w-full border-0"
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        allowFullScreen
+                      />
+                    </div>
+                  )}
+
+                  <p className="mt-2 text-xs text-gray-500">
                     {tr("ระบบจะใช้ตำแหน่งของคุณเพื่อตรวจสอบการเข้าเรียน")}
                   </p>
                 </div>
@@ -805,6 +876,63 @@ export default function CheckInStudentPage({
           {tr("AttendHub · ระบบบันทึกการเข้าเรียน")}
         </p>
       </div>
+
+      {isMapDialogOpen && form.location && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-3 sm:p-6"
+          onClick={() => setIsMapDialogOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="map-dialog-title"
+            className="flex h-[90dvh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+              <div className="min-w-0">
+                <h2
+                  id="map-dialog-title"
+                  className="text-lg font-semibold text-slate-800"
+                >
+                  {tr("แผนที่ตำแหน่งของคุณ")}
+                </h2>
+
+                <p className="mt-1 text-xs text-slate-500">
+                  Lat: {form.location.lat.toFixed(6)}, Lng:{" "}
+                  {form.location.lng.toFixed(6)}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsMapDialogOpen(false)}
+                aria-label={tr("ปิดแผนที่")}
+                className="shrink-0 rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 cursor-pointer"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="min-h-0 flex-1 bg-slate-100">
+              <iframe
+                title={tr("แผนที่ตำแหน่งปัจจุบันแบบขยาย")}
+                src={`https://maps.google.com/maps?q=${form.location.lat},${form.location.lng}&z=18&output=embed`}
+                className="h-full w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-3 border-t border-slate-200 px-5 py-4">
+              <p className="text-xs text-slate-500">
+                {tr("ตำแหน่งที่บันทึกจะอ้างอิงจากพิกัดที่ดึงมา")}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
