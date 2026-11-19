@@ -1,7 +1,6 @@
 "use client";
 import { useLanguage } from "@/lib/language";
 
-
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeftIcon, CheckIcon } from "@heroicons/react/24/outline";
@@ -24,7 +23,9 @@ export default function ForgotPasswordPage() {
         href="/login"
         className="inline-flex items-center gap-2 rounded text-sm text-gray-500 transition hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
       >
-        <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />{tr("กลับเข้าสู่ระบบ")}</Link>
+        <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
+        {tr("กลับเข้าสู่ระบบ")}
+      </Link>
 
       <ol
         aria-label={tr("ขั้นตอนการตั้งรหัสผ่านใหม่")}

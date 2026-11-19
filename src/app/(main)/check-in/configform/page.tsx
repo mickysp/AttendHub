@@ -328,10 +328,12 @@ export default function CheckInFormPage() {
               >{tr("เลือกรายวิชา")}</h2>
               <p className="mt-1 text-sm text-slate-500">{tr("การตั้งค่าจะบันทึกแยกตามรายวิชา")}</p>
             </div>
+
             <label
               id="config-class-label"
               className="mb-2 block text-sm font-medium text-slate-700"
             >{tr("รายวิชา")}</label>
+            
             <div ref={classDropdownRef} className="relative">
               <button
                 id="config-class"
@@ -355,6 +357,7 @@ export default function CheckInFormPage() {
                 </span>
                 <ChevronDownIcon className="h-4 w-4 shrink-0 text-gray-400" />
               </button>
+
               {classDropdownOpen && (
                 <div
                   role="listbox"
@@ -376,6 +379,7 @@ export default function CheckInFormPage() {
                 </div>
               )}
             </div>
+
             {!classesLoading && !classes.length && !loadError && (
               <p className="mt-3 text-sm text-slate-500">{tr("ยังไม่มีรายวิชา กรุณาเพิ่มรายวิชาก่อนตั้งค่า")}</p>
             )}
@@ -390,7 +394,9 @@ export default function CheckInFormPage() {
                 id="fields-section-heading"
                 className="text-base font-semibold text-slate-800"
               >{tr("ช่องข้อมูลในแบบฟอร์ม")}</h2>
+
               <p className="mt-1 text-sm text-slate-500">{tr("เลือกช่องที่ต้องการให้นักศึกษากรอกเมื่อเช็คชื่อ")}</p>
+
               {configReady && (
                 <p className="mt-3 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
                   {usesDefault
@@ -398,9 +404,11 @@ export default function CheckInFormPage() {
                     : tr("กำลังใช้การตั้งค่าเฉพาะวิชา")}
                 </p>
               )}
+
               {!selectedClassId && !classesLoading && (
                 <p className="mt-3 text-sm text-slate-500">{tr("เลือกรายวิชาเพื่อเริ่มตั้งค่า")}</p>
               )}
+
               {loadError && (
                 <p role="alert" className="mt-3 text-sm text-red-600">
                   {tr(loadError)}{" "}

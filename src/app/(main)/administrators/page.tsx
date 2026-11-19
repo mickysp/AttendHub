@@ -100,6 +100,7 @@ export default function AdministratorsPage() {
         setOpenFormPrefix(false);
       } else if (event.key === "Escape" && !busy) setShowForm(false);
     };
+
     const onMouseDown = (event: MouseEvent) => {
       if (
         formRoleRef.current &&
@@ -114,6 +115,7 @@ export default function AdministratorsPage() {
     };
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("mousedown", onMouseDown);
+
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("mousedown", onMouseDown);
@@ -122,7 +124,9 @@ export default function AdministratorsPage() {
 
   function bounceDialog() {
     const dialog = dialogRef.current;
+
     if (!dialog) return;
+
     dialog.classList.remove("app-dialog-attention");
     void dialog.offsetWidth;
     dialog.classList.add("app-dialog-attention");
@@ -185,6 +189,7 @@ export default function AdministratorsPage() {
 
   function changeRole(user: Administrator, role: AdministratorRole) {
     if (!canManage || busy || role === user.role) return;
+    
     void showConfirm(
       `เปลี่ยนสิทธิ์ของ ${user.fullname}?`,
       async () => {
@@ -215,6 +220,7 @@ export default function AdministratorsPage() {
 
   function removeUser(user: Administrator) {
     if (!canManage) return;
+
     void showConfirm(
       `ลบผู้ใช้ ${user.fullname}?`,
       async () => {

@@ -1,7 +1,6 @@
 "use client";
 import { useLanguage } from "@/lib/language";
 
-
 import { checkInApi } from "@/services/api/check-in";
 import { classesApi } from "@/services/api/classes";
 import { attendanceApi } from "@/services/api/attendance";
@@ -267,7 +266,9 @@ export default function CheckInStudentPage({
       <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-300">
         <div className="flex flex-col items-center gap-4">
           <div className="h-14 w-14 animate-spin rounded-full border-4 border-white border-t-transparent"></div>
-          <p className="text-gray-600 text-base text-white">{tr("กำลังโหลด...")}</p>
+          <p className="text-gray-600 text-base text-white">
+            {tr("กำลังโหลด...")}
+          </p>
         </div>
       </div>
     );
@@ -280,12 +281,16 @@ export default function CheckInStudentPage({
           role="alert"
           className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center"
         >
-          <p className="text-slate-700">{tr("โหลดแบบฟอร์มของรายวิชาไม่สำเร็จ กรุณาลองอีกครั้ง")}</p>
+          <p className="text-slate-700">
+            {tr("โหลดแบบฟอร์มของรายวิชาไม่สำเร็จ กรุณาลองอีกครั้ง")}
+          </p>
           <button
             type="button"
             onClick={() => setConfigRetry((value) => value + 1)}
             className="mt-4 rounded-lg bg-blue-600 px-5 py-2 text-sm text-white"
-          >{tr("ลองอีกครั้ง")}</button>
+          >
+            {tr("ลองอีกครั้ง")}
+          </button>
         </div>
       </main>
     );
@@ -300,9 +305,13 @@ export default function CheckInStudentPage({
         >
           <CheckCircleIcon className="w-20 h-20 text-green-500 mx-auto mb-5" />
 
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">{tr("เช็คชื่อสำเร็จ")}</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            {tr("เช็คชื่อสำเร็จ")}
+          </h2>
 
-          <p className="text-sm text-gray-500 leading-relaxed">{tr("คุณได้ทำการเช็คชื่อเรียบร้อยแล้ว")}</p>
+          <p className="text-sm text-gray-500 leading-relaxed">
+            {tr("คุณได้ทำการเช็คชื่อเรียบร้อยแล้ว")}
+          </p>
         </div>
       </div>
     );
@@ -314,7 +323,9 @@ export default function CheckInStudentPage({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-300">
           <div className="flex flex-col items-center gap-4">
             <div className="h-12 w-12 animate-spin rounded-full border-4 border-white border-t-transparent"></div>
-            <p className="text-white text-sm font-noto">{tr("กำลังบันทึก...")}</p>
+            <p className="text-white text-sm font-noto">
+              {tr("กำลังบันทึก...")}
+            </p>
           </div>
         </div>
       )}
@@ -330,9 +341,12 @@ export default function CheckInStudentPage({
                 <p className="text-xs font-medium tracking-widest text-slate-400">
                   AttendHub
                 </p>
-                <p className="mt-0.5 text-sm text-slate-600">{tr("เช็คชื่อเข้าเรียน")}</p>
+                <p className="mt-0.5 text-sm text-slate-600">
+                  {tr("เช็คชื่อเข้าเรียน")}
+                </p>
               </div>
             </div>
+
             <div className="mb-3 flex flex-wrap gap-2">
               {classInfo?.classCodes?.map((code) => (
                 <span
@@ -347,6 +361,7 @@ export default function CheckInStudentPage({
               {classInfo?.className || tr("ไม่พบข้อมูลรายวิชา")}
             </h1>
           </div>
+
           <section
             aria-labelledby="checkin-instructions-title"
             className="bg-slate-50/60 px-5 py-5 sm:px-8"
@@ -354,25 +369,44 @@ export default function CheckInStudentPage({
             <h2
               id="checkin-instructions-title"
               className="mb-2 text-sm font-semibold text-slate-700"
-            >{tr("คำชี้แจงการเช็คชื่อ")}</h2>
+            >
+              {tr("คำชี้แจงการเช็คชื่อ")}
+            </h2>
             <ol className="list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-slate-500">
-              <li>{tr("ตรวจสอบรายวิชา และกรอกข้อมูลนักศึกษาของตนเองให้ถูกต้องครบถ้วน")}</li>
+              <li>
+                {tr(
+                  "ตรวจสอบรายวิชา และกรอกข้อมูลนักศึกษาของตนเองให้ถูกต้องครบถ้วน",
+                )}
+              </li>
               {config?.photo && (
-                <li>{tr("แนบรูปถ่ายยืนยันตัวตนตามเงื่อนไขที่ระบุในแบบฟอร์ม")}</li>
+                <li>
+                  {tr("แนบรูปถ่ายยืนยันตัวตนตามเงื่อนไขที่ระบุในแบบฟอร์ม")}
+                </li>
               )}
               {config?.location && (
-                <li>{tr("อนุญาตการเข้าถึงตำแหน่ง แล้วกดดึงตำแหน่งปัจจุบัน")}</li>
+                <li>
+                  {tr("อนุญาตการเข้าถึงตำแหน่ง แล้วกดดึงตำแหน่งปัจจุบัน")}
+                </li>
               )}
-              <li>{tr("กด “ยืนยันเช็คชื่อ” และรอจนระบบแสดงข้อความเช็คชื่อสำเร็จ")}</li>
+              <li>
+                {tr("กด “ยืนยันเช็คชื่อ” และรอจนระบบแสดงข้อความเช็คชื่อสำเร็จ")}
+              </li>
             </ol>
 
             {config?.photo && (
               <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
                 <p className="text-sm text-blue-800 leading-relaxed">
-                  <span className="font-semibold block mb-1">{tr("เงื่อนไขการเช็คชื่อด้วยรูปถ่าย")}</span>{tr("กรุณาถ่ายภาพตัวเองตามตัวอย่าง โดยให้เห็นใบหน้าชัดเจนและมีหน้าจอประกอบอยู่ในภาพ หากไม่ปฏิบัติตามเงื่อนไขดังกล่าว จะถือว่า")}{" "}{" "}
+                  <span className="font-semibold block mb-1">
+                    {tr("เงื่อนไขการเช็คชื่อด้วยรูปถ่าย")}
+                  </span>
+                  {tr(
+                    "กรุณาถ่ายภาพตัวเองตามตัวอย่าง โดยให้เห็นใบหน้าชัดเจนและมีหน้าจอประกอบอยู่ในภาพ หากไม่ปฏิบัติตามเงื่อนไขดังกล่าว จะถือว่า",
+                  )}{" "}
                   <b>{tr("ไม่ประสงค์จะเช็คชื่อ")}</b>
                   <br />
-                  <br />{tr("หากตรวจพบการทุจริต จะมีการ")}<b>{tr("ตัด 2 คะแนนดิบ (ไม่หาร)")}</b>{" "}
+                  <br />
+                  {tr("หากตรวจพบการทุจริต จะมีการ")}
+                  <b>{tr("ตัด 2 คะแนนดิบ (ไม่หาร)")}</b>{" "}
                 </p>
               </div>
             )}
@@ -387,14 +421,21 @@ export default function CheckInStudentPage({
             <h2
               id="student-info-title"
               className="text-base font-semibold text-slate-800"
-            >{tr("ข้อมูลนักศึกษา")}</h2>
-            <p className="mt-1 text-sm leading-relaxed text-slate-500">{tr("กรอกข้อมูลของคุณให้ครบถ้วน แล้วตรวจสอบก่อนยืนยันเช็คชื่อ")}</p>
+            >
+              {tr("ข้อมูลนักศึกษา")}
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-slate-500">
+              {tr("กรอกข้อมูลของคุณให้ครบถ้วน แล้วตรวจสอบก่อนยืนยันเช็คชื่อ")}
+            </p>
           </div>
+
           <div className="px-5 py-6 sm:px-8 sm:py-7">
             <div className="space-y-6">
               {(config?.prefix || config?.firstname || config?.lastname) && (
                 <div className="space-y-2">
-                  <p className="block text-sm font-medium text-slate-700">{tr("ชื่อ-นามสกุล")}</p>
+                  <p className="block text-sm font-medium text-slate-700">
+                    {tr("ชื่อ-นามสกุล")}
+                  </p>
 
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-[0.8fr_1fr_1fr]">
                     {config?.prefix && (
@@ -488,7 +529,9 @@ export default function CheckInStudentPage({
                   <label
                     htmlFor="student-id"
                     className="mb-2 block text-sm font-medium text-slate-700"
-                  >{tr("รหัสนักศึกษา")}</label>
+                  >
+                    {tr("รหัสนักศึกษา")}
+                  </label>
 
                   <input
                     id="student-id"
@@ -532,7 +575,9 @@ export default function CheckInStudentPage({
               )}
 
               {errors.studentId && (
-                <p className="text-xs text-red-500 mt-1">{tr(errors.studentId)}</p>
+                <p className="text-xs text-red-500 mt-1">
+                  {tr(errors.studentId)}
+                </p>
               )}
 
               {config?.section && (
@@ -593,7 +638,9 @@ export default function CheckInStudentPage({
                   <label
                     htmlFor="student-email"
                     className="mb-2 block text-sm font-medium text-slate-700"
-                  >{tr("อีเมล")}</label>
+                  >
+                    {tr("อีเมล")}
+                  </label>
                   <input
                     id="student-email"
                     type="email"
@@ -612,7 +659,9 @@ export default function CheckInStudentPage({
 
               {config?.note && (
                 <div>
-                  <label className="text-sm text-gray-700 mb-1 block">{tr("หมายเหตุเพิ่มเติม")}</label>
+                  <label className="text-sm text-gray-700 mb-1 block">
+                    {tr("หมายเหตุเพิ่มเติม")}
+                  </label>
 
                   <textarea
                     placeholder={tr("กรอกหมายเหตุ (ถ้ามี)")}
@@ -631,14 +680,20 @@ export default function CheckInStudentPage({
 
               {(config?.photo || config?.location) && (
                 <div className="border-t border-slate-100 pt-6">
-                  <h3 className="text-sm font-semibold text-slate-800">{tr("ยืนยันการเข้าเรียน")}</h3>
-                  <p className="mt-1 text-sm text-slate-500">{tr("แนบข้อมูลตามที่รายวิชากำหนด")}</p>
+                  <h3 className="text-sm font-semibold text-slate-800">
+                    {tr("ยืนยันการเข้าเรียน")}
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {tr("แนบข้อมูลตามที่รายวิชากำหนด")}
+                  </p>
                 </div>
               )}
 
               {config?.photo && (
                 <div>
-                  <label className="text-sm text-gray-700 mb-1 block">{tr("ถ่ายรูปยืนยันตัวตน")}</label>
+                  <label className="text-sm text-gray-700 mb-1 block">
+                    {tr("ถ่ายรูปยืนยันตัวตน")}
+                  </label>
 
                   {!preview && (
                     <div className="relative">
@@ -690,7 +745,9 @@ export default function CheckInStudentPage({
 
               {config?.location && (
                 <div>
-                  <label className="text-sm text-gray-700 mb-1 block">{tr("ตำแหน่งที่ตั้ง")}</label>
+                  <label className="text-sm text-gray-700 mb-1 block">
+                    {tr("ตำแหน่งที่ตั้ง")}
+                  </label>
 
                   <button
                     type="button"
@@ -716,7 +773,9 @@ export default function CheckInStudentPage({
                     </span>
                   </button>
 
-                  <p className="text-xs text-gray-500 mt-1">{tr("ระบบจะใช้ตำแหน่งของคุณเพื่อตรวจสอบการเข้าเรียน")}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {tr("ระบบจะใช้ตำแหน่งของคุณเพื่อตรวจสอบการเข้าเรียน")}
+                  </p>
                 </div>
               )}
 
@@ -731,13 +790,20 @@ export default function CheckInStudentPage({
                       : "bg-slate-100 text-slate-400"
                   }`}
                 >
-                  <CheckCircleIcon aria-hidden="true" className="h-5 w-5" />{tr("ยืนยันเช็คชื่อ")}</button>
-                <p className="mt-3 text-center text-xs leading-relaxed text-slate-400">{tr("โปรดตรวจสอบชื่อและรหัสนักศึกษาให้ถูกต้องก่อนยืนยัน")}</p>
+                  <CheckCircleIcon aria-hidden="true" className="h-5 w-5" />
+                  {tr("ยืนยันเช็คชื่อ")}
+                </button>
+                <p className="mt-3 text-center text-xs leading-relaxed text-slate-400">
+                  {tr("โปรดตรวจสอบชื่อและรหัสนักศึกษาให้ถูกต้องก่อนยืนยัน")}
+                </p>
               </div>
             </div>
           </div>
         </section>
-        <p className="pb-2 text-center text-xs text-slate-400">{tr("AttendHub · ระบบบันทึกการเข้าเรียน")}</p>
+
+        <p className="pb-2 text-center text-xs text-slate-400">
+          {tr("AttendHub · ระบบบันทึกการเข้าเรียน")}
+        </p>
       </div>
     </main>
   );

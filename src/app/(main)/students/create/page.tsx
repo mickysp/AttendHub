@@ -1,7 +1,6 @@
 "use client";
 import { useLanguage } from "@/lib/language";
 
-
 import { classesApi } from "@/services/api/classes";
 import { majorsApi } from "@/services/api/majors";
 import { studentsApi } from "@/services/api/students";
@@ -35,22 +34,16 @@ type Major = {
 
 export default function CreateStudentPage() {
   const { tr } = useLanguage();
-
   const router = useRouter();
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
-
   const [loading, setLoading] = useState(false);
-
   const [classes, setClasses] = useState<Class[]>([]);
   const [majors, setMajors] = useState<Major[]>([]);
-
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedMajor, setSelectedMajor] = useState("");
-
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
   const [students, setStudents] = useState<StudentItem[]>([
     { studentId: "", fullName: "", email: "", section: "" },
   ]);
@@ -188,7 +181,9 @@ export default function CreateStudentPage() {
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-300">
             <div className="flex flex-col items-center gap-4">
               <div className="h-14 w-14 animate-spin rounded-full border-4 border-white border-t-transparent"></div>
-              <p className="text-gray-600 text-base text-white">{tr("กำลังโหลด...")}</p>
+              <p className="text-gray-600 text-base text-white">
+                {tr("กำลังโหลด...")}
+              </p>
             </div>
           </div>
         )}
@@ -206,11 +201,15 @@ export default function CreateStudentPage() {
                 <ArrowLeftIcon className="w-3 h-3 text-gray-700" />
               </button>
 
-              <h1 className="text-[26px] font-semibold text-gray-800">{tr("เพิ่มนักศึกษา")}</h1>
+              <h1 className="text-[26px] font-semibold text-gray-800">
+                {tr("เพิ่มนักศึกษา")}
+              </h1>
             </div>
 
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100">
-              <span className="text-sm text-gray-500">{tr("จำนวนนักศึกษาที่เพิ่ม")}</span>
+              <span className="text-sm text-gray-500">
+                {tr("จำนวนนักศึกษาที่เพิ่ม")}
+              </span>
               <span className="text-sm font-semibold text-blue-600">
                 {students.filter((s) => s.studentId || s.fullName).length}
               </span>
@@ -306,7 +305,8 @@ export default function CreateStudentPage() {
                 className="border border-gray-50 bg-[var(--card)] rounded-xl p-4"
               >
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="font-medium text-gray-800">{tr("ข้อมูลนักศึกษาที่")}{" "}{index + 1}
+                  <h2 className="font-medium text-gray-800">
+                    {tr("ข้อมูลนักศึกษาที่")} {index + 1}
                   </h2>
 
                   {students.length > 1 && (
@@ -322,7 +322,9 @@ export default function CreateStudentPage() {
                 <div className="grid grid-cols-1 gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm text-gray-800">{tr("รหัสนักศึกษา")}</label>
+                      <label className="text-sm text-gray-800">
+                        {tr("รหัสนักศึกษา")}
+                      </label>
                       <input
                         maxLength={11}
                         value={item.studentId}
@@ -343,12 +345,16 @@ export default function CreateStudentPage() {
                         placeholder={tr("เช่น 650123456-7")}
                       />
                       {item.studentId && !isValidStudentId(item.studentId) && (
-                        <p className="text-xs text-red-500 mt-1">{tr("รูปแบบต้องเป็น 123456789-0")}</p>
+                        <p className="text-xs text-red-500 mt-1">
+                          {tr("รูปแบบต้องเป็น 123456789-0")}
+                        </p>
                       )}
                     </div>
 
                     <div>
-                      <label className="text-sm text-gray-800">{tr("ชื่อ-นามสกุล")}</label>
+                      <label className="text-sm text-gray-800">
+                        {tr("ชื่อ-นามสกุล")}
+                      </label>
 
                       <input
                         value={item.fullName}
@@ -364,14 +370,20 @@ export default function CreateStudentPage() {
                       />
 
                       {item.fullName && !isValidName(item.fullName) && (
-                        <p className="text-xs text-red-500 mt-1">{tr("กรุณากรอกชื่อ-นามสกุลภาษาไทยหรืออังกฤษให้ถูกต้อง")}</p>
+                        <p className="text-xs text-red-500 mt-1">
+                          {tr(
+                            "กรุณากรอกชื่อ-นามสกุลภาษาไทยหรืออังกฤษให้ถูกต้อง",
+                          )}
+                        </p>
                       )}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm text-gray-800">{tr("อีเมล")}</label>
+                      <label className="text-sm text-gray-800">
+                        {tr("อีเมล")}
+                      </label>
 
                       <input
                         value={item.email}
@@ -387,7 +399,9 @@ export default function CreateStudentPage() {
                       />
 
                       {item.email && !isValidEmail(item.email) && (
-                        <p className="text-xs text-red-500 mt-1">{tr("รูปแบบอีเมลไม่ถูกต้อง เช่น example@email.com")}</p>
+                        <p className="text-xs text-red-500 mt-1">
+                          {tr("รูปแบบอีเมลไม่ถูกต้อง เช่น example@email.com")}
+                        </p>
                       )}
                     </div>
 
@@ -407,7 +421,9 @@ export default function CreateStudentPage() {
                         placeholder={tr("เช่น 1, 4, 10")}
                       />
                       {item.section && !/^[1-9]\d*$/.test(item.section) && (
-                        <p className="mt-1 text-xs text-red-500">{tr("Section ต้องเป็นจำนวนเต็มมากกว่า 0")}</p>
+                        <p className="mt-1 text-xs text-red-500">
+                          {tr("Section ต้องเป็นจำนวนเต็มมากกว่า 0")}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -420,13 +436,17 @@ export default function CreateStudentPage() {
             <button
               onClick={handleAddStudent}
               className="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-            >{tr("+ เพิ่มนักศึกษา")}</button>
+            >
+              {tr("+ เพิ่มนักศึกษา")}
+            </button>
 
             <div className="flex gap-2">
               <button
                 onClick={() => router.push("/students")}
                 className="px-6 py-2.5 rounded-md border border-gray-300 text-gray-600 text-sm hover:bg-gray-100 cursor-pointer"
-              >{tr("ยกเลิก")}</button>
+              >
+                {tr("ยกเลิก")}
+              </button>
 
               <button
                 onClick={() =>

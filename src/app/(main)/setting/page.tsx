@@ -1,7 +1,6 @@
 "use client";
 import { useLanguage } from "@/lib/language";
 
-
 import { useEffect, useState } from "react";
 import AppearanceSection from "@/components/setting/AppearanceSection";
 import NotificationSettingsSection from "@/components/setting/NotificationSettingsSection";
@@ -112,15 +111,21 @@ export default function SettingPage() {
               type="button"
               onClick={retry}
               className="cursor-pointer rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm text-white hover:bg-[var(--primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
-            >{tr("ลองอีกครั้ง")}</button>
+            >
+              {tr("ลองอีกครั้ง")}
+            </button>
           </div>
         ) : (
           profile &&
           notificationSettings && (
             <div className="flex min-h-full flex-col gap-5 sm:gap-6">
               <header className="rounded-2xl border border-gray-200 bg-white px-5 py-4 sm:px-6 sm:py-5">
-                <h1 className="text-[26px] font-semibold text-gray-800">{tr("ตั้งค่า")}</h1>
-                <p className="mt-1 text-sm text-gray-500">{tr("จัดการข้อมูลส่วนตัวและรูปแบบการแสดงผล")}</p>
+                <h1 className="text-[26px] font-semibold text-gray-800">
+                  {tr("ตั้งค่า")}
+                </h1>
+                <p className="mt-1 text-sm text-gray-500">
+                  {tr("จัดการข้อมูลส่วนตัวและรูปแบบการแสดงผล")}
+                </p>
               </header>
               <ProfileSection initialProfile={profile} />
               <AppearanceSection />

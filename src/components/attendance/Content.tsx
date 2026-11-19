@@ -67,7 +67,6 @@ export default function AttendanceContent() {
         const loadedSummaries: typeof summaries = {};
         let nextTask = 0;
 
-        // Bound concurrent requests while preloading every selectable class/year.
         async function loadSummaries() {
           while (nextTask < tasks.length && !controller.signal.aborted) {
             const task = tasks[nextTask++];
