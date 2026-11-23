@@ -119,12 +119,12 @@ export default function LoginForm() {
       const normalizedRole = role.toLowerCase();
 
       const nextPage =
-        normalizedRole === "teacher"
+        normalizedRole === "admin"
           ? "/dashboard"
-          : normalizedRole === "teaching assistant"
-            ? "/attendance"
-            : normalizedRole === "admin"
-              ? "/admin"
+          : normalizedRole === "teacher"
+            ? "/dashboard"
+            : normalizedRole === "teaching assistant"
+              ? "/attendance"
               : "";
 
       if (!nextPage) {
@@ -146,7 +146,6 @@ export default function LoginForm() {
       setDestination(nextPage);
       setStatus("redirecting");
       router.replace(nextPage);
-
     } catch (error) {
       if (controller.signal.reason === "unmounted") return;
       setLoginError(
@@ -361,7 +360,7 @@ export default function LoginForm() {
             {tr("หากหน้ายังไม่เปลี่ยน คลิกเพื่อเปิดหน้าระบบ")}
           </a>
         )}
-        
+
         {loginError && (
           <p
             role="alert"

@@ -38,7 +38,7 @@ export default function DashboardPage() {
 
     async function checkAdmin() {
       try {
-        const response = await fetch("/api/auth/me", {
+        const response = await fetch("/api/auth/user", {
           cache: "no-store",
           signal: controller.signal,
         });
