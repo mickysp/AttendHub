@@ -16,6 +16,7 @@ interface Props {
   totalCount: number;
   canManage: boolean;
   canCreate: boolean;
+  canDelete: boolean;
   currentUserId: string;
   busy: boolean;
   loading: boolean;
@@ -32,6 +33,7 @@ export default function AdministratorTable({
   totalCount,
   canManage,
   canCreate,
+  canDelete,
   currentUserId,
   busy,
   loading,
@@ -233,7 +235,7 @@ export default function AdministratorTable({
             </p>
             <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-4">
               <div className="min-w-0 flex-1">{roleSelect(user)}</div>
-              {canManage && deleteButton(user)}
+              {canDelete && deleteButton(user)}
             </div>
           </div>
         ))}
@@ -258,7 +260,7 @@ export default function AdministratorTable({
                 >
                   {tr("สิทธิ์ปัจจุบัน")}
                 </th>
-                {canManage && (
+                {canDelete && (
                   <th className="sticky top-0 z-10 w-[11%] bg-gray-50 px-3 text-left font-semibold">
                     {tr("จัดการ")}
                   </th>
@@ -282,7 +284,7 @@ export default function AdministratorTable({
                     {user.email}
                   </td>
                   <td className="px-3 py-3">{roleSelect(user)}</td>
-                  {canManage && (
+                  {canDelete && (
                     <td className="px-3 py-3">{deleteButton(user)}</td>
                   )}
                 </tr>

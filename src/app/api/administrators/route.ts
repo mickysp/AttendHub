@@ -38,6 +38,7 @@ export async function GET() {
     currentUserId: String(actor._id),
     canManage: ["Admin", "Teacher"].includes(actor.role),
     canCreate: true,
+    canDelete: actor.role === "Admin",
   });
 }
 
@@ -157,7 +158,7 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   const actor = await currentUser();
-  
+
   if (!actor || !["Admin", "Teacher"].includes(actor.role)) return forbidden();
   const body = await req.json().catch(() => null);
 
@@ -204,7 +205,8 @@ export async function PATCH(req: Request) {
 export async function DELETE(req: Request) {
   const actor = await currentUser();
 
-  if (!actor || !["Admin", "Teacher"].includes(actor.role)) return forbidden();
+  // อนุญาตเฉพาะ Admin เท่านั้น
+  if (!actor || actor.role !== "Admin") return forbidden();
 
   const body = await req.json().catch(() => null);
 
@@ -214,22 +216,33 @@ export async function DELETE(req: Request) {
   if (String(actor._id) === body.id) return invalid("ไม่สามารถลบบัญชีของตนเอง");
 
   const users = (await clientPromise).db("attendance").collection("users");
-  const target = await users.findOne({ _id: new ObjectId(body.id) });
-  const result = await users.deleteOne({ _id: new ObjectId(body.id) });
 
-  if (!result.deletedCount)
+  const targetId = new ObjectId(body.id);
+  const target = await users.findOne({ _id: targetId });
+
+  if (!target)
     return NextResponse.json(
       { success: false, message: "ไม่พบผู้ใช้" },
       { status: 404 },
     );
+
+  const result = await users.deleteOne({ _id: targetId });
+
+  if (!result.deletedCount)
+    return NextResponse.json(
+      { success: false, message: "ไม่สามารถลบผู้ใช้ได้" },
+      { status: 500 },
+    );
+
   await (
     await clientPromise
   )
     .db("attendance")
     .collection("profile_images")
-    .deleteOne({ _id: new ObjectId(body.id) });
+    .deleteOne({ _id: targetId });
 
-  const targetName = String(target?.fullname ?? target?.username ?? "ผู้ใช้");
+  const targetName = String(target.fullname ?? target.username ?? "ผู้ใช้");
+
   await recordActivity({
     actor,
     category: "accounts",
@@ -237,5 +250,9 @@ export async function DELETE(req: Request) {
     message: `ลบบัญชีผู้ใช้ “${targetName}”`,
     target: targetName,
   });
-  return NextResponse.json({ success: true, message: "ลบผู้ใช้สำเร็จ" });
+
+  return NextResponse.json({
+    success: true,
+    message: "ลบผู้ใช้สำเร็จ",
+  });
 }

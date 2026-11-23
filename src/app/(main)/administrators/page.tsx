@@ -64,6 +64,7 @@ export default function AdministratorsPage() {
     Partial<Record<keyof typeof emptyForm, string>>
   >({});
   const [showPassword, setShowPassword] = useState(false);
+  const [canDelete, setCanDelete] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -73,6 +74,7 @@ export default function AdministratorsPage() {
       setCurrentUserId(data.currentUserId);
       setCanManage(data.canManage === true);
       setCanCreate(data.canCreate === true);
+      setCanDelete(data.canDelete === true);
       setError("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "โหลดข้อมูลไม่สำเร็จ");
@@ -189,7 +191,7 @@ export default function AdministratorsPage() {
 
   function changeRole(user: Administrator, role: AdministratorRole) {
     if (!canManage || busy || role === user.role) return;
-    
+
     void showConfirm(
       `เปลี่ยนสิทธิ์ของ ${user.fullname}?`,
       async () => {
@@ -219,7 +221,7 @@ export default function AdministratorsPage() {
   }
 
   function removeUser(user: Administrator) {
-    if (!canManage) return;
+    if (!canDelete) return;
 
     void showConfirm(
       `ลบผู้ใช้ ${user.fullname}?`,
@@ -303,6 +305,7 @@ export default function AdministratorsPage() {
               totalCount={users.length}
               canManage={canManage}
               canCreate={canCreate}
+              canDelete={canDelete}
               currentUserId={currentUserId}
               busy={busy}
               loading={loading}
