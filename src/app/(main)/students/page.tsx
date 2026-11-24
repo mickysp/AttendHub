@@ -9,13 +9,13 @@ import {
   DocumentArrowUpIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
-import EmptyStateIcon from "@/components/common/EmptyStateIcon";
 import StudentFilter from "@/components/students/Select";
 import { useRouter } from "next/navigation";
 import StudentTable from "@/components/students/Table";
 import { useConfirm } from "@/context/swal";
 import { useAlert } from "@/context/AlertContext";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { UsersIcon } from "@heroicons/react/24/outline";
 
 type StudentInput = {
   _id: string;
@@ -125,10 +125,8 @@ export default function StudentsPage() {
   const [importLoading, setImportLoading] = useState(false);
 
   const [hasInitialData, setHasInitialData] = useState(false);
-
   const [years, setYears] = useState<number[]>([]);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
-
   const [openYear, setOpenYear] = useState(false);
   const yearRef = useRef<HTMLDivElement>(null);
 
@@ -158,6 +156,7 @@ export default function StudentsPage() {
     }
     return "";
   };
+
   const canImport = !getImportValidationError();
   const allImportsComplete =
     importResults.length === importRows.length &&
@@ -171,11 +170,13 @@ export default function StudentsPage() {
     setMajorSearch("");
     setOpenImport(true);
   };
+
   const filteredClasses = classes.filter((item) =>
     item.name
       .toLocaleLowerCase()
       .includes(classSearch.trim().toLocaleLowerCase()),
   );
+
   const filteredMajors = majors.filter((item) =>
     item.toLocaleLowerCase().includes(majorSearch.trim().toLocaleLowerCase()),
   );
@@ -234,6 +235,7 @@ export default function StudentsPage() {
 
     return matchKeyword && matchClass && matchBranch && matchSection;
   });
+  
   const selectedListClass = classes.find(
     (item) => item._id === filters.classId,
   );
@@ -418,7 +420,7 @@ export default function StudentsPage() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-blue-50">
-      <div className="relative min-h-0 min-w-0 flex-1 overflow-y-auto p-4 pt-[80px] font-noto sm:p-6 sm:pt-[80px] lg:pt-6">
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-4 pt-[80px] font-noto sm:p-6 sm:pt-[80px] lg:pt-6">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-300/80 backdrop-blur-[1px]">
             <div className="flex flex-col items-center gap-4">
@@ -429,10 +431,7 @@ export default function StudentsPage() {
         )}
 
         {!loading && (
-          <div
-            className={`flex min-w-0 flex-col rounded-2xl bg-white
-            ${!hasInitialData ? "min-h-[90vh]" : ""}`}
-          >
+          <div className="flex min-h-full min-w-0 flex-1 flex-col rounded-2xl bg-white">
             <div className="flex flex-col gap-4 px-4 pt-5 sm:px-6 sm:pt-6 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <h1 className="text-[26px] font-semibold text-gray-800">
@@ -541,30 +540,58 @@ export default function StudentsPage() {
               )}
 
               {!hasInitialData && (
-                <div className="flex flex-1 flex-col items-center justify-center text-center">
-                  <EmptyStateIcon kind="students" />
+                <div className="flex flex-1 flex-col items-center justify-center px-4 pb-8 text-center">
+                  <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-50">
+                    <UsersIcon
+                      className="h-9 w-9 text-blue-500"
+                      strokeWidth={1.5}
+                    />
+                  </div>
 
-                  <p className="mb-4 whitespace-nowrap text-sm text-gray-500">
+                  <p className="text-base font-medium text-gray-700">
                     {tr("ยังไม่มีข้อมูลนักศึกษา")}
                   </p>
 
+                  <p className="mt-2 text-sm text-gray-400">
+                    {tr("นำเข้ารายชื่อนักศึกษาเพื่อเริ่มต้นใช้งาน")}
+                  </p>
+
                   <button
+                    type="button"
                     onClick={openImportDialog}
-                    className="px-5 py-2.5 rounded-md text-sm bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] flex items-center gap-2 shadow-sm cursor-pointer"
+                    className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg bg-[var(--primary)] px-6 text-sm font-medium text-white transition hover:bg-[var(--primary-hover)] cursor-pointer"
                   >
-                    <DocumentArrowUpIcon className="w-5 h-5" />
-                    Import
+                    <DocumentArrowUpIcon className="h-5 w-5" />
+                    {tr("นำเข้ารายชื่อ")}
                   </button>
                 </div>
               )}
 
               {hasInitialData && data.length === 0 && (
-                <div className="flex flex-1 flex-col items-center justify-center text-center">
-                  <EmptyStateIcon kind="students" />
+                <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4 pb-8 text-center">
+                  <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50">
+                    <UsersIcon
+                      className="h-8 w-8 text-gray-400"
+                      strokeWidth={1.5}
+                    />
+                  </div>
 
-                  <p className="whitespace-nowrap text-sm text-gray-500">
+                  <p className="text-base font-medium text-gray-700">
                     {tr("ยังไม่มีข้อมูลรายนักศึกษาล่าสุด")}
                   </p>
+
+                  <p className="mt-2 text-sm text-gray-400">
+                    {tr("ลองเลือกปีการศึกษาอื่น หรือนำเข้ารายชื่อนักศึกษา")}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={openImportDialog}
+                    className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg border border-gray-200 px-6 text-sm font-medium text-gray-600 transition hover:bg-gray-50 cursor-pointer"
+                  >
+                    <DocumentArrowUpIcon className="h-5 w-5" />
+                    {tr("นำเข้ารายชื่อ")}
+                  </button>
                 </div>
               )}
 
