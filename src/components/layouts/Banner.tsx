@@ -1,5 +1,3 @@
-import LanguageSwitcher from "./LanguageSwitcher";
-
 export default function AuthLayout({
   children,
 }: {
@@ -16,9 +14,6 @@ export default function AuthLayout({
         lg:grid-cols-[60%_40%]
       "
     >
-      <div className="absolute right-4 top-4 z-30 sm:right-6 sm:top-6">
-        <LanguageSwitcher />
-      </div>
       <div
         className="
           hidden
@@ -32,15 +27,15 @@ export default function AuthLayout({
         "
       >
         <h1 className="text-5xl font-semibold text-zinc-800 xl:text-7xl">
-          Attendance
+          AttendHub
         </h1>
 
         <h2 className="mt-2 text-4xl text-blue-900 xl:text-6xl">
-          for university classrooms
+          University Attendance Management
         </h2>
 
         <p className="mt-6 max-w-md text-sm text-zinc-500 xl:text-base">
-          Record and monitor student attendance in your classroom.
+          Manage classes, track student attendance, and monitor attendance records — all in one place.
         </p>
       </div>
 

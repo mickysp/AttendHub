@@ -25,7 +25,7 @@ const messages = {
     notifications: "การแจ้งเตือน",
     loading: "กำลังโหลด...",
     unnamed: "ไม่ระบุชื่อ",
-    noRole: "ไม่ระบุ Role",
+    noRole: "ไม่ระบุสิทธิ์",
     logout: "ออกจากระบบ",
     loggingOut: "กำลังออกจากระบบ...",
     profileImage: "รูปโปรไฟล์",
@@ -70,7 +70,10 @@ function getSnapshot(): Language {
   return currentLanguage;
 }
 
-export function translate(text: string | null | undefined, parameters?: Record<string, string | number>) {
+export function translate(
+  text: string | null | undefined,
+  parameters?: Record<string, string | number>,
+) {
   return translateText(text, getSnapshot(), parameters);
 }
 
@@ -106,6 +109,18 @@ export function useLanguage() {
     } catch {}
     window.dispatchEvent(new Event(changeEvent));
   };
-  const tr = useCallback((text: string | null | undefined, parameters?: Record<string, string | number>) => translateText(text, language, parameters), [language]);
-  return { language, setLanguage, t: messages[language], tr, locale: language === "en" ? "en-GB" : "th-TH" };
+  const tr = useCallback(
+    (
+      text: string | null | undefined,
+      parameters?: Record<string, string | number>,
+    ) => translateText(text, language, parameters),
+    [language],
+  );
+  return {
+    language,
+    setLanguage,
+    t: messages[language],
+    tr,
+    locale: language === "en" ? "en-GB" : "th-TH",
+  };
 }

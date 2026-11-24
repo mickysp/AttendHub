@@ -110,7 +110,7 @@ export default function AttendanceContent() {
                 students: Array.isArray(result.data) ? result.data : [],
               };
             } catch (cause) {
-              if (controller.signal.aborted) return;
+              if (controller.signal.aborted) return;  
 
               loadedSummaries[key] = {
                 students: [],
